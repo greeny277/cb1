@@ -130,6 +130,7 @@ clean:
 	@rm -f $(call F_TEMPFILES, $(call F_SOURCES, $(ALLSUBDIRS)))
 	rm -f */*.tmp */*.o */*.S *.tmp *.o *.S 
 	rm -f */*.dot */*.dump */*.cil *.dot *.dump *.cil
+	rm -f */*.AST */*.CIL *.AST *.CIL
 
 help:
 	@echo Verfügbare Targets:
