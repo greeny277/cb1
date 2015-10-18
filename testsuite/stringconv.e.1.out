@@ -1,0 +1,11 @@
+dummy:=writeChar(72);
+dummy:=writeChar(97);
+dummy:=writeChar(108);
+dummy:=writeChar(108);
+dummy:=writeChar(111);
+dummy:=writeChar(32);
+dummy:=writeChar(87);
+dummy:=writeChar(101);
+dummy:=writeChar(108);
+dummy:=writeChar(116);
+dummy:=writeChar(10);
