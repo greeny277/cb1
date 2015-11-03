@@ -20,7 +20,7 @@ class InternalError(Error):
 class InputError(Error):
     """base class for any errors caused by wrong input programs
     (grammar errors, type errors, use of undeclared variables, etc)"""
-    def __init__(self, msg, line):
+    def __init__(self, msg, line=-1):
         super(InputError, self).__init__(msg + (" @%d" % (line)))
 
 
