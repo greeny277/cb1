@@ -268,7 +268,6 @@ class LValue(Expression):
     arrayDeref: possibly empty list of array access expressions"""
     def __init__(self, name):
         super(LValue, self).__init__()
-        Expression.__init__(self)
         self.name = name
         self.arrayDeref = []
 
@@ -353,7 +352,6 @@ class CondExpr(Expression):
     right: right subexpression"""
     def __init__(self, left, op, right):
         super(CondExpr, self).__init__()
-        Expression.__init__(self)
         self.left = left
         self.op = op
         self.right = right
