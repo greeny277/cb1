@@ -299,7 +299,7 @@ class Literal(Expression):
         return []
 
     def desc(self):
-        return self.val
+        return str(self.val)
 
 
 class IntLiteral(Literal):
