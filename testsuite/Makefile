@@ -1,9 +1,9 @@
 # -*- tab-width: 8 -*-
 # Externally configurable variables:
 # The path to the compiler
-COMPILER ?= ../bin/mcc
+MCC ?= ../bin/mcc
 # Options used by the compiler
-COMPILEROPTS ?=	 
+MCCFLAGS ?=  
 # Script to run the binaries
 RUNBIN ?= ../bin/runbinary
 # timeout for binaries
@@ -13,7 +13,7 @@ export TIMEOUT
 
 ############ global constants ######################################
 # suffixes of temporary files created by compilation
-TMPSUF := o S AST CIL ces.tmp
+TMPSUF := o S AST CIL ces.tmp loops *.imdoms *.cfg cil.json *.predictableExpressions *.availableExpressions *.LiveVars *.postdump *.domBounds *.AvailableExpressions *.InterferenceGraph *.cil.json
 
 # suffixes of temporary files created by running the testcases
 TCTMPSUF := res.tmp out.tmp 
@@ -30,8 +30,9 @@ SUBDIRS_EX2 := . correct correct_uses_real incorrect_grammar incorrect_vardecl
 # subdirs for exercise 3
 SUBDIRS_EX3 := . correct correct_uses_real incorrect_grammar incorrect_vardecl incorrect_type
 
-# subdirs for last exercise, when we want to compile and run
-SUBDIRS_RUN := . correct incorrect_grammar incorrect_vardecl incorrect_type
+# subdirs for last two exercises, when we want to compile and run
+SUBDIRS_RUNNABLE := . correct
+SUBDIRS_COMPILALE := . correct  incorrect_grammar incorrect_vardecl incorrect_type
 
 ############ make file functions ##################################
 # given a list of directories, returns a list of all .e files in these directories
@@ -57,6 +58,10 @@ F_COMPSTAMPS = $(patsubst %.e,%.e.compstamp, $(1))
 # same thing after running a testcase.
 F_RUNSTAMPS = $(patsubst %.e,%.e.runstamp, $(1))
 
+# same thing after running a testcase.
+F_INTERPSTAMPS = $(patsubst %.e,%.e.interpstamp, $(1))
+F_INTERPFILES  = $(patsubst %.e,%.e.json, $(1))
+
 ############ make weirdness with implicit rules ###########################
 # there are some funny rules deleting .e files, disable them!
 .SUFFIXES:
@@ -71,7 +76,7 @@ F_RUNSTAMPS = $(patsubst %.e,%.e.runstamp, $(1))
 	else								\
 		/bin/echo -ne "compiling $<:\texpecting FAIL:    ";	\
 	fi
-	@$(COMPILER) $(COMPILEROPTS) -o $<.run $< > /dev/null 2> /dev/null; echo $$? > $<.ces.tmp
+	@$(MCC) $(MCCFLAGS) -o $<.run $< > /dev/null 2> /dev/null; echo $$? > $<.ces.tmp
 	@if [ "$$(cat $<.ces.tmp)" = "0" ] ; then	\
 		echo SUCCESS;				\
 	else						\
@@ -80,21 +85,43 @@ F_RUNSTAMPS = $(patsubst %.e,%.e.runstamp, $(1))
 	@diff -q $<.ces $<.ces.tmp > /dev/null 2> /dev/null ||	exit 1
 	@touch $@
 
+%.e.json: %.e
+	$(MCC) $(MCCFLAGS) --dump-cil-to-file-and-exit $@ $<
+
 # run all testcases, and if they're successfull, touch a stampfile
-%.e.runstamp: %.e.compstamp
-	@for out in $(patsubst %.e.compstamp,%.e.,$<)*.out; do		\
-		bin=$(patsubst %.e.compstamp,%.e.run,$<);		\
+%.e.runstamp: %.e.run %.e.compstamp
+	@for out in $(patsubst %.e.run,%.e.,$<)*.out; do			\
 		[ -f $$out ] || continue;				\
-		[ -f $$bin ] || continue;				\
 		in=$${out%.out}.in ;					\
 		res=$${out%.out}.res ;					\
 		if [ -f "$$in" ] ; then					\
-			echo "./$$bin > $$out.tmp < $$in";		\
-			$(RUNBIN) ./$$bin $$in > $$out.tmp < $$in;	\
+			echo "./$< > $$out.tmp < $$in";			\
+			$(RUNBIN) ./$< $$in > $$out.tmp < $$in;		\
 			echo $$? > $$res.tmp;				\
 		else							\
-			echo "./$$bin > $$out.tmp" ;			\
-			$(RUNBIN) ./$$bin > $$out.tmp ;			\
+			echo "./$< > $$out.tmp" ;			\
+			$(RUNBIN) ./$< > $$out.tmp ;			\
+			echo $$? > $$res.tmp;				\
+		fi;							\
+		diff --strip-trailing-cr -u $$res $$res.tmp || exit 1 ;	\
+		diff --strip-trailing-cr -u $$out $$out.tmp || exit 1 ;	\
+	done
+	@touch $@
+
+# interpret all testcases, and if they're successfull, touch a stampfile
+%.e.interpstamp: %.e.json
+	@export INTERPRET=True;						\
+	for out in $(patsubst %.e.json,%.e.,$<)*.out; do		\
+		[ -f $$out ] || continue;				\
+		in=$${out%.out}.in ;					\
+		res=$${out%.out}.res ;					\
+		if [ -f "$$in" ] ; then					\
+			echo "interpret ./$< > $$out.tmp < $$in";	\
+			$(RUNBIN) ./$< $$in > $$out.tmp < $$in;		\
+			echo $$? > $$res.tmp;				\
+		else							\
+			echo "interpret ./$< > $$out.tmp" ;		\
+			$(RUNBIN) ./$< > $$out.tmp ;			\
 			echo $$? > $$res.tmp;				\
 		fi;							\
 		diff --strip-trailing-cr -u $$res $$res.tmp || exit 1 ;	\
@@ -107,43 +134,51 @@ all: compile run
 
 # compiling by default depends on creating .e.compstamp - files.
 # creating these files will (as side effect) compile our E-Files :-)
-compile: $(call F_COMPSTAMPS, $(call F_SOURCES,$(SUBDIRS_RUN)))
+compile: $(call F_COMPSTAMPS, $(call F_SOURCES,$(SUBDIRS_COMPILALE)))
 
 # analogously: we have a rule that creates .e.runstamp - files,
 # and, as a side effect, runs the test cases.
 # so we depend on creating all the .e.runstamp - files, which will
 # run the testcases
-run: $(call F_RUNSTAMPS, $(call F_SOURCES,$(SUBDIRS_RUN)))
+run: $(call F_RUNSTAMPS, $(call F_SOURCES,$(SUBDIRS_RUNNABLE)))
+
+# same as above
+interpret: $(call F_INTERPSTAMPS, $(call F_SOURCES,$(SUBDIRS_RUNNABLE)))
 
 # special targets. Up to Exercise 3, we can not yet correctly detect
 # all errors, so we do not compile everything yet.
-uebung01: $(call F_COMPSTAMPS, $(call F_SOURCES, $(SUBDIRS_EX1)))
-uebung02: $(call F_COMPSTAMPS, $(call F_SOURCES, $(SUBDIRS_EX2)))
-uebung03: $(call F_COMPSTAMPS, $(call F_SOURCES, $(SUBDIRS_EX3)))
+meilenstein1: $(call F_COMPSTAMPS, $(call F_SOURCES, $(SUBDIRS_EX1)))
+meilenstein2: $(call F_COMPSTAMPS, $(call F_SOURCES, $(SUBDIRS_EX2)))
+meilenstein3: $(call F_COMPSTAMPS, $(call F_SOURCES, $(SUBDIRS_EX3)))
+meilenstein4: $(call F_INTERPFILES, $(call F_SOURCES, $(SUBDIRS_RUNNABLE))) interpret
 
 clean:
 	@echo removing stamp files
-	@rm -f $(call F_COMPSTAMPS, $(call F_SOURCES,$(ALLSUBDIRS)))
-	@rm -f $(call F_RUNSTAMPS,  $(call F_SOURCES,$(ALLSUBDIRS)))
+	@rm -f $(call F_COMPSTAMPS,   $(call F_SOURCES,$(ALLSUBDIRS)))
+	@rm -f $(call F_INTERPSTAMPS, $(call F_SOURCES,$(ALLSUBDIRS)))
+	@rm -f $(call F_INTERPFILES,  $(call F_SOURCES,$(ALLSUBDIRS)))
+	@rm -f $(call F_RUNSTAMPS,    $(call F_SOURCES,$(ALLSUBDIRS)))
 	@echo removing binaries and temp files
 	@rm -f $(call F_BINS, $(call F_SOURCES, $(ALLSUBDIRS)))
 	@rm -f $(call F_TEMPFILES, $(call F_SOURCES, $(ALLSUBDIRS)))
-	rm -f */*.tmp */*.o */*.S *.tmp *.o *.S 
-	rm -f */*.dot */*.dump */*.cil *.dot *.dump *.cil
-	rm -f */*.AST */*.CIL *.AST *.CIL
+	@rm -f */*.tmp */*.o */*.S *.tmp *.o *.S 
+	@rm -f */*.dot */*.dump */*.cil *.dot *.dump *.cil
+	@rm -f */*.AST */*.CIL *.AST *.CIL
 
 help:
 	@echo Verfügbare Targets:
-	@echo "   all      - default target, ruft 'compile' und 'run' auf"
-	@echo "   compile  - kompiliert alle Programme (bis auf die, die Gleitkommazahlen verwenden)"
-	@echo "   run      - testet die Programme, für die Testcases existieren"
-	@echo "   clean    - räumt temporäre Dateien und Kompilatsergebnisse auf"
-	@echo "   uebung01 - kompiliert alle Programme die nach Übung 1 kompilieren sollen"
-	@echo "   uebung02 - kompiliert alle Programme die nach Übung 2 kompilieren sollen"
-	@echo "   uebung03 - kompiliert alle Programme die nach Übung 3 kompilieren sollen"
-	@echo "   help     - dieses Target"
+	@echo "   all          - default target, ruft 'compile' und 'run' auf"
+	@echo "   compile      - kompiliert alle Programme (bis auf die, die Gleitkommazahlen verwenden)"
+	@echo "   run          - testet die Programme, für die Testcases existieren"
+	@echo "   clean        - räumt temporäre Dateien und Kompilatsergebnisse auf"
+	@echo "   meilenstein1 - kompiliert alle Programme die nach M. 1 kompilieren sollen"
+	@echo "   meilenstein2 - kompiliert alle Programme die nach M. 2 kompilieren sollen"
+	@echo "   meilenstein3 - kompiliert alle Programme die nach M. 3 kompilieren sollen"
+	@echo "   meilenstein4 - erzeugt IR aus allen lauffähigen Programmen und führt diese"
+	@echo "                  in einem Interpreter aus."
+	@echo "   help         - dieses Target"
 	@echo "Zu Risiken und Nebenwirkungen lesen sie das README und fragen sie ihren "
 	@echo "Übungsleiter oder Professor."
 
 
-.PHONY: all clean compile run uebung01 uebung02 uebung03 help
+.PHONY: all clean compile run interpret meilenstein1 meilenstein2 meilenstein3 meilenstein4 meilenstein5

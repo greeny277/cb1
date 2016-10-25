@@ -98,7 +98,7 @@ int main() {
    int xx;
    int printtime;
    printtime := 0;
-   sz := 10000000;
+   sz := 10000;
 
    stime := time();
    dummy := reset();

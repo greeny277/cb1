@@ -27,7 +27,7 @@ int matmult() {
 
 int main() {
     int dummy;
-    dim := 200;
+    dim := 50;
     dummy := matmult();
     return 0;
 }

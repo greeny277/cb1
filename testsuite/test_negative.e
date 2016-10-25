@@ -12,7 +12,7 @@ int main()
     d := writeInt( 0-(9223372036854775807+1) );
 	d := writeChar( 10 );
     
-	d := writeInt( (0-9223372036854775807)-1 );
+	d := writeInt( 0-9223372036854775807-1 );
 	d := writeChar( 10 );
 	
 	d := writeInt( 0-922337203685477580 );

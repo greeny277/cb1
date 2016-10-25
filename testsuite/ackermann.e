@@ -16,7 +16,8 @@ main()
 {
 	int dummy;
 
-	dummy := ackermann(3, 11);
+	dummy := ackermann(3, 6);
+    dummy := writeInt(dummy);
     
 	return 0;
 }
