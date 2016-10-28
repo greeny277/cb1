@@ -239,7 +239,6 @@ class ReturnStmt(Statement):
     def children(self):
         yield self.expr
 
-# TODO: create ast node class representing a while statement
 
 class WhileStmt(Statement):
     """class representing a while statement
@@ -251,6 +250,7 @@ class WhileStmt(Statement):
         super(WhileStmt, self).__init__()
         self.cond = cond
         self.block = block
+
     def children(self):
         yield self.cond
         yield self.block
