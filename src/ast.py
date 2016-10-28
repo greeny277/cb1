@@ -241,6 +241,20 @@ class ReturnStmt(Statement):
 
 # TODO: create ast node class representing a while statement
 
+class WhileStmt(Statement):
+    """class representing a while statement
+
+    Members:
+    cond: condition
+    block: body of the statement"""
+    def __init__(self, cond, block):
+        super(WhileStmt, self).__init__()
+        self.cond = cond
+        self.block = block
+    def children(self):
+        yield self.cond
+        yield self.block
+
 
 class Expression(AstNode):
     """base class representing expressions
