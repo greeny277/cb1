@@ -328,7 +328,18 @@ class FloatLiteral(Literal):
         super(FloatLiteral, self).__init__(val, Type.getRealType())
 
 
-# TODO: create ast node class representing a function call.
+class FuncCall(AstNode):
+    """Declaration of a function"""
+    def __init__(self, func_name, par_list):
+        super(FuncCall, self).__init__()
+        self.func_name = func_name
+        self.par_list = par_list
+
+    def children(self):
+        yield self.func_name
+        for x in self.par_list:
+            yield x
+
 
 
 class ArithExpr(Expression):
