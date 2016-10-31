@@ -137,6 +137,11 @@ def p_returnstmt(p):
     p[0] = ast.ReturnStmt(p[2]).addloc(p.lineno(1))
 
 
+def p_whilestmt(p):
+    '''whilestmt : TKWHILE '(' cond_expr ')' block'''
+    p[0] = ast.WhileStmt(p[3], p[5]).addloc(p.lineno(1))
+
+
 def p_assgnstmt(p):
     '''assgnstmt : lvalue ASSIGN arith_expr ';' '''
     p[0] = ast.AssignStmt(p[1], p[3]).addloc(p.lineno(1))
