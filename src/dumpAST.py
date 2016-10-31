@@ -112,7 +112,8 @@ def dump(node, fd, indentlvl=0, varDeclSpecialCase=False):
     elif isinstance(node, FuncCall):
         dump(node.func_name, fd)
         fd.write("(")
-        dump(node.par_list, fd)
+        for x in node.par_list:
+            dump(x, fd)
         fd.write(")")
     else:
         raise InternalError("unimplemented ast node type")

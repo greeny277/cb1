@@ -328,7 +328,7 @@ class FloatLiteral(Literal):
         super(FloatLiteral, self).__init__(val, Type.getRealType())
 
 
-class FuncCall(AstNode):
+class FuncCall(Expression):
     """Declaration of a function"""
     def __init__(self, func_name, par_list):
         super(FuncCall, self).__init__()
