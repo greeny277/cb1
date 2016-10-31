@@ -118,6 +118,7 @@ def p_stmtlist(p):
 def p_stmt(p):
     '''stmt : ifstmt
             | assgnstmt
+            | whilestmt
             | returnstmt
             | block '''
     p[0] = p[1]

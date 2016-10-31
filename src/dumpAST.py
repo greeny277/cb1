@@ -9,6 +9,7 @@ from ast import \
     Block, \
     AssignStmt, \
     IfStmt, \
+    WhileStmt, \
     ReturnStmt, \
     LValue, \
     IntLiteral, \
@@ -75,6 +76,12 @@ def dump(node, fd, indentlvl=0, varDeclSpecialCase=False):
         fd.write(" " * indentlvl + "return ")
         dump(node.expr, fd)
         fd.write(";\n")
+    elif isinstance(node, WhileStmt):
+        fd.write(" " * indentlvl + "while(")
+        dump(node.cond, fd)
+        fd.write(")\n")
+        dump(node.block, fd)
+        fd.write(" " * indentlvl + "\n")
     elif isinstance(node, LValue):
         dump(node.name, fd)
         for l in node.arrayDeref:
