@@ -204,8 +204,10 @@ def p_term(p):
 def p_factor_funcall(p):
     '''factor : identifier '(' arg_list ')'
               | identifier '(' ')' '''
-    # TODO: create and return ast node representing a function call
-    raise InternalError("unimplemented")
+    if len(p) == 4:
+        p[0] = ast.FuncCall(p[1], []).addloc(p.lineno(1))
+    else:
+        p[0] = ast.FuncCall(p[1], p[3]).addloc(p.lineno(1))
 
 
 def p_factor_nofuncall(p):
@@ -229,8 +231,10 @@ def p_constant(p):
 def p_arg_list(p):
     '''arg_list : arg_list ',' arith_expr
                 | arith_expr '''
-    # TODO: create and return argument list
-    raise InternalError("unimplemented")
+    if len(p) == 4:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
 
 
 def p_error(p):
