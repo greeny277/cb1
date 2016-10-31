@@ -16,6 +16,7 @@ from ast import \
     FloatLiteral, \
     Operator, \
     ArithExpr, \
+    FuncCall, \
     CondExpr
 
 from common import InternalError
@@ -107,6 +108,11 @@ def dump(node, fd, indentlvl=0, varDeclSpecialCase=False):
         dump(node.op, fd)
         fd.write(" ")
         dump(node.right, fd)
+        fd.write(")")
+    elif isinstance(node, FuncCall):
+        dump(node.func_name, fd)
+        fd.write("(")
+        dump(node.par_list, fd)
         fd.write(")")
     else:
         raise InternalError("unimplemented ast node type")
