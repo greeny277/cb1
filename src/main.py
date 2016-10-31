@@ -40,7 +40,8 @@ parser.add_argument('--dump-cil', help="dump CIL", action='store_true', default=
 parser.add_argument('-m', help="choose backend (x86|arm|amd64|jvm|...)", nargs=1,
                     default="amd64", metavar="<backend>")
 parser.add_argument('inputfile', help="Input File", metavar="<inputFile>")
-
+parser.add_argument('--dotify-ast', help="Generate a dot file out of a given source file", action='store_true',
+                    default=False)
 
 def main(arguments):
     """main function"""
@@ -68,6 +69,8 @@ def main(arguments):
         # file name of CIL Dump
         cildumpfile = inputfilebasename + ".CIL"
 
+        # file name of DOT Dump
+        dotdumpfile = inputfilebasename + ".dot"
         x = e_parser.doParsing(inputfile)
 
         # TODO: fold constants
@@ -75,12 +78,17 @@ def main(arguments):
         # TODO: resolve declarations
 
         # TODO: check types
-        
+
         if myargs.dump_ast is not None:
             adf = open(astdumpfile, "w")
             adf.write("AST dump\n")
             # TODO: write AST to file object adf
             adf.close()
+
+        if myargs.dotify_ast is not None:
+            # TODO
+            ddf = open(dotdumpfile, "w")
+
 
         # This ast dumping is for debugging purposes,
         # you may remove it.
