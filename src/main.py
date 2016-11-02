@@ -7,6 +7,7 @@ import os
 import sys
 import dumpAST
 import common
+import dumpDot
 
 from common import InputError
 
@@ -70,7 +71,6 @@ def main(arguments):
         cildumpfile = inputfilebasename + ".CIL"
 
         # file name of DOT Dump
-        dotdumpfile = inputfilebasename + ".dot"
         x = e_parser.doParsing(inputfile)
 
         # TODO: fold constants
@@ -87,8 +87,10 @@ def main(arguments):
 
         if myargs.dotify_ast is not None:
             # TODO
+            dotdumpfile = inputfilebasename + ".dot"
             ddf = open(dotdumpfile, "w")
-
+            dumpDot.dump(x, ddf)
+            ddf.close()
 
         # This ast dumping is for debugging purposes,
         # you may remove it.
