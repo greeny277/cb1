@@ -84,3 +84,39 @@ def dump(node, fd):
         for c in node.children():
             fd.write(str(my_id) + " -> ")
             dump(c, fd)
+    elif isinstance(node, LValue):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + "[label=\"LValue\"]\n")
+        fd.write(str(my_id) + " -> ")
+        for c in node.children():
+            fd.write(str(my_id) + " -> ")
+            dump(c, fd)
+    elif isinstance(node, IntLiteral) \
+            or isinstance(node, FloatLiteral) \
+            or isinstance(node, Operator):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + "[label=\"")
+        fd.write(node.name)
+        fd.write("\"]\n")
+    elif isinstance(node, ArithExpr):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + "[label=\"ArithExpr\"]\n")
+        fd.write(str(my_id) + " -> ")
+        for c in node.children():
+            fd.write(str(my_id) + " -> ")
+            dump(c, fd)
+    elif isinstance(node, CondExpr):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + "[label=\"CondExpr\"]\n")
+        fd.write(str(my_id) + " -> ")
+        for c in node.children():
+            fd.write(str(my_id) + " -> ")
+            dump(c, fd)
+    elif isinstance(node, FuncCall):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + "[label=\"FuncCall\"]\n")
+        fd.write(str(my_id) + " -> ")
+        for c in node.children():
+            fd.write(str(my_id) + " -> ")
+            dump(c, fd)
+
