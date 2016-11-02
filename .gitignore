@@ -3,3 +3,9 @@ __pycache__
 *.o
 *.out
 src/parsetab.py
+*.pyc
+*.pdf
+*.S
+*.dot
+*.AST
+*.CIL
