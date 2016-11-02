@@ -40,12 +40,47 @@ def dump(node, fd):
         fd.write("}")
     elif isinstance(node, VarDecl):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + "[label=VarDecl]")
+        fd.write(str(my_id) + "[label=\"VarDecl\"]\n")
         for c in node.children():
             fd.write(str(my_id) + " -> ")
             dump(c, fd)
     elif isinstance(node, Identifier):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + "[label=")
+        fd.write(str(my_id) + "[label=\"")
         fd.write(node.name)
-        fd.write("]")
+        fd.write("\"]\n")
+    elif isinstance(node, Type):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + "[label=\"")
+        fd.write(node.desc() + "\"]\n")
+    elif isinstance(node, Block):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + "[label=\"BLOCK\"]\n")
+        for c in node.children():
+            fd.write(str(my_id) + " -> ")
+            dump(c, fd)
+    elif isinstance(node, AssignStmt):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + "[label=\":=\"]\n")
+        for c in node.children():
+            fd.write(str(my_id) + " -> ")
+            dump(c, fd)
+    elif isinstance(node, IfStmt):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + "[label=\"IF\"]\n")
+        for c in node.children():
+            fd.write(str(my_id) + " -> ")
+            dump(c, fd)
+    elif isinstance(node, WhileStmt):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + "[label=\"WHILE\"]\n")
+        for c in node.children():
+            fd.write(str(my_id) + " -> ")
+            dump(c, fd)
+    elif isinstance(node, WhileStmt):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + "[label=\"RETURN\"]\n")
+        fd.write(str(my_id) + " -> ")
+        for c in node.children():
+            fd.write(str(my_id) + " -> ")
+            dump(c, fd)
