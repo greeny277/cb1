@@ -34,21 +34,29 @@ def dumpDot(node, fd):
     print("My DOTID: " + str(my_id))
     if isinstance(node, Program):
         fd.write("digraph AST {\n")
-        fd.write(str(my_id) + " [label=\"program\"]\n")
+        fd.write(str(my_id) + " [label=\"program\"];\n")
         for c in node.children():
             fd.write(str(my_id) + " -> ")
             dumpDot(c, fd)
         fd.write("}")
     elif isinstance(node, Function):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"Function\"]\n")
+        fd.write(str(my_id) + " [label=\"")
+        fd.write(node.type.desc() + " ")
+        fd.write(node.name.name + "(")
+        sep = ""
+        for c in node.arglist:
+            fd.write(sep)
+            fd.wrote(c.type.desc() + " ")
+            fd.write(c.name)
+            sep = ", "
+        fd.write(")")
+        fd.write("\"];\n")
         fd.write(str(my_id) + " -> ")
-        for c in node.children():
-            fd.write(str(my_id) + " -> ")
-            dumpDot(c, fd)
+        dumpDot(node.block, fd)
     elif isinstance(node, VarDecl):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"VarDecl\"]\n")
+        fd.write(str(my_id) + " [label=\"VarDecl\"];\n")
         for c in node.children():
             fd.write(str(my_id) + " -> ")
             dumpDot(c, fd)
@@ -56,45 +64,66 @@ def dumpDot(node, fd):
         fd.write(str(my_id) + ";\n")
         fd.write(str(my_id) + " [label=\"")
         fd.write(node.name)
-        fd.write("\"]\n")
+        fd.write("\"];\n")
     elif isinstance(node, Type):
         fd.write(str(my_id) + ";\n")
         fd.write(str(my_id) + " [label=\"")
         fd.write(node.desc() + "\"]\n")
     elif isinstance(node, Block):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"BLOCK\"]\n")
+        fd.write(str(my_id) + " [label=\"BLOCK\"];\n")
         for c in node.children():
             fd.write(str(my_id) + " -> ")
             dumpDot(c, fd)
     elif isinstance(node, AssignStmt):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\":=\"]\n")
+        fd.write(str(my_id) + " [label=\":=\"];\n")
         for c in node.children():
             fd.write(str(my_id) + " -> ")
             dumpDot(c, fd)
     elif isinstance(node, IfStmt):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"IF\"]\n")
-        for c in node.children():
-            fd.write(str(my_id) + " -> ")
-            dumpDot(c, fd)
+        fd.write(str(my_id) + " [label=\"IF-COND\"];\n")
+        " Create THEN path "
+        then_id = _dot_id
+        _dot_id = _dot_id + 1
+        fd.write(str(my_id) + " -> " + str(then_id) + ";\n")
+        fd.write(str(then_id) + " [label=\"THEN\"];\n")
+        " Create COND path "
+        cond_id = _dot_id
+        _dot_id = _dot_id + 1
+        fd.write(str(my_id) + " -> " + str(cond_id) + ";\n")
+        fd.write(str(cond_id) + " [label=\"COND\"];\n")
+        " Create ELSE path "
+        else_id = _dot_id
+        _dot_id = _dot_id + 1
+        fd.write(str(my_id) + " -> " + str(else_id) + ";\n")
+        fd.write(str(else_id) + " [label=\"ELSE\"];\n")
+
+
+        fd.write(str(then_id) + " -> ")
+        dumpDot(node.trueblock, fd)
+        fd.write(str(cond_id) + " -> ")
+        dumpDot(node.cond, fd)
+        fd.write(str(else_id) + " -> ")
+        dumpDot(node.falseblock, fd)
+
     elif isinstance(node, WhileStmt):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"WHILE\"]\n")
+        fd.write(str(my_id) + " [label=\"WHILE\"];\n")
         for c in node.children():
             fd.write(str(my_id) + " -> ")
             dumpDot(c, fd)
     elif isinstance(node, ReturnStmt):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"RETURN\"]\n")
+        fd.write(str(my_id) + " [label=\"RETURN\"];\n")
         fd.write(str(my_id) + " -> ")
         for c in node.children():
             fd.write(str(my_id) + " -> ")
             dumpDot(c, fd)
     elif isinstance(node, LValue):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"LValue\"]\n")
+        fd.write(str(my_id) + " [label=\"LValue\"];\n")
         fd.write(str(my_id) + " -> ")
         for c in node.children():
             fd.write(str(my_id) + " -> ")
@@ -105,24 +134,24 @@ def dumpDot(node, fd):
         fd.write(str(my_id) + ";\n")
         fd.write(str(my_id) + " [label=\"")
         fd.write(node.val)
-        fd.write("\"]\n")
+        fd.write("\"];\n")
     elif isinstance(node, ArithExpr):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"ArithExpr\"]\n")
+        fd.write(str(my_id) + " [label=\"ArithExpr\"];\n")
         fd.write(str(my_id) + " -> ")
         for c in node.children():
             fd.write(str(my_id) + " -> ")
             dumpDot(c, fd)
     elif isinstance(node, CondExpr):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"CondExpr\"]\n")
+        fd.write(str(my_id) + " [label=\"CondExpr\"];\n")
         fd.write(str(my_id) + " -> ")
         for c in node.children():
             fd.write(str(my_id) + " -> ")
             dumpDot(c, fd)
     elif isinstance(node, FuncCall):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"FuncCall\"]\n")
+        fd.write(str(my_id) + " [label=\"FuncCall\"];\n")
         fd.write(str(my_id) + " -> ")
         for c in node.children():
             fd.write(str(my_id) + " -> ")
