@@ -65,7 +65,7 @@ def dumpDot(node, fd):
             dumpDot(c, fd)
     elif isinstance(node, Identifier):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"")
+        fd.write(str(my_id) + " [label=\"id: ")
         fd.write(node.name)
         fd.write("\"];\n")
     elif isinstance(node, Type):
@@ -120,7 +120,6 @@ def dumpDot(node, fd):
     elif isinstance(node, ReturnStmt):
         fd.write(str(my_id) + ";\n")
         fd.write(str(my_id) + " [label=\"RETURN\"];\n")
-        fd.write(str(my_id) + " -> ")
         for c in node.children():
             fd.write(str(my_id) + " -> ")
             dumpDot(c, fd)
@@ -132,32 +131,39 @@ def dumpDot(node, fd):
             fd.write(str(my_id) + " -> ")
             dumpDot(c, fd)
     elif isinstance(node, IntLiteral) \
-            or isinstance(node, FloatLiteral) \
-            or isinstance(node, Operator):
+            or isinstance(node, FloatLiteral):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + " [label=\" const: ")
+        fd.write(node.val)
+        fd.write("\"];\n")
+    elif isinstance(node, Operator):
         fd.write(str(my_id) + ";\n")
         fd.write(str(my_id) + " [label=\"")
         fd.write(node.val)
         fd.write("\"];\n")
-    elif isinstance(node, ArithExpr):
+    elif isinstance(node, CondExpr) \
+            or isinstance(node, ArithExpr):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"ArithExpr\"];\n")
+        fd.write(str(my_id) + " [label=\"")
+        dumpAST.dump(node.op, fd)
+        fd.write("\"];\n")
         fd.write(str(my_id) + " -> ")
-        for c in node.children():
-            fd.write(str(my_id) + " -> ")
-            dumpDot(c, fd)
-    elif isinstance(node, CondExpr):
-        fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"CondExpr\"];\n")
+        dumpDot(node.left, fd)
         fd.write(str(my_id) + " -> ")
-        for c in node.children():
-            fd.write(str(my_id) + " -> ")
-            dumpDot(c, fd)
+        dumpDot(node.right, fd)
     elif isinstance(node, FuncCall):
         fd.write(str(my_id) + ";\n")
         fd.write(str(my_id) + " [label=\"FuncCall\"];\n")
+
         fd.write(str(my_id) + " -> ")
-        for c in node.children():
-            fd.write(str(my_id) + " -> ")
+        dumpDot(node.func_name, fd)
+
+        arglist_id = _dot_id
+        _dot_id = _dot_id + 1
+        fd.write(str(my_id) + " -> " + str(arglist_id) + ";\n")
+        fd.write(str(arglist_id) + " [label=\"ArgList\"];\n")
+        for c in node.par_list:
+            fd.write(str(arglist_id) + " -> ")
             dumpDot(c, fd)
     else:
         print("-----------MISSING IMPLEMENTATION-------------")
