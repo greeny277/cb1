@@ -129,11 +129,9 @@ def dumpDot(node, fd):
             dumpDot(c, fd)
     elif isinstance(node, LValue):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"LValue\"];\n")
-        fd.write(str(my_id) + " -> ")
-        for c in node.children():
-            fd.write(str(my_id) + " -> ")
-            dumpDot(c, fd)
+        fd.write(str(my_id) + " [label=\"")
+        dumpAST.dump(node.name, fd)
+        fd.write("\"];\n")
     elif isinstance(node, IntLiteral) \
             or isinstance(node, FloatLiteral) \
             or isinstance(node, Operator):
