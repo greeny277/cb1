@@ -348,20 +348,6 @@ class FuncCall(Expression):
             yield x
 
 
-class ArrayAccess(Expression):
-    """ class for acessing the array
-    
-    Members:
-    expr: list of index expressions"""
-    def __init__(self, left, expr):
-        super(ArrayAccess, self).__init__()
-        self.left = left
-        self.expr = expr
-
-    def children(self):
-        yield self.left
-        yield self.expr
-
 class ArithExpr(Expression):
     """class representing an arithmetic expression
 
