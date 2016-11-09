@@ -34,9 +34,23 @@ def p_program(p):
         p[0].addvar(p[2])
 
 
+def p_arraydecllist(p):
+    '''arraydecl : '[' arith_expr ']' arraydecl
+                 | '[' arith_expr ']' '''
+    if len(p) == 5:
+        p[0] = [p[2]] + p[4]
+    else:
+        p[0] = [p[2]]
+
+
 def p_vardecl(p):
-    '''vardecl : type identifier'''
-    p[0] = ast.VarDecl(p[1], p[2]).addloc(p.lineno(1))
+    '''vardecl : type identifier
+               | type arraydecl identifier'''
+    if len(p) == 4:
+        p[0] = ast.VarDecl(p[1], p[3]).addloc(p.lineno(1))
+        p[0].addArray(p[2])
+    else:
+        p[0] = ast.VarDecl(p[1], p[2]).addloc(p.lineno(1))
 
 
 def p_funcdecl(p):
@@ -44,6 +58,7 @@ def p_funcdecl(p):
                 | type identifier '('         ')' block'''
     if len(p) == 7:
         p[0] = ast.Function(p[1], p[2], p[4], p[6]).addloc(p.lineno(1))
+
     else:
         p[0] = ast.Function(p[1], p[2], [], p[5]).addloc(p.lineno(1))
 

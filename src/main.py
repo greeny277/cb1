@@ -89,7 +89,7 @@ def main(arguments):
             # TODO
             dotdumpfile = inputfilebasename + ".dot"
             ddf = open(dotdumpfile, "w")
-            dumpDot.dumpDot(x, ddf)
+#            dumpDot.dumpDot(x, ddf)
             ddf.close()
 
         # This ast dumping is for debugging purposes,

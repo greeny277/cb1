@@ -32,6 +32,10 @@ def dump(node, fd, indentlvl=0, varDeclSpecialCase=False):
         if not varDeclSpecialCase:
             fd.write(" " * indentlvl)
         dump(node.type, fd)
+        for l in node.array:
+            fd.write("[")
+            dump(l, fd)
+            fd.write("]")
         fd.write(" ")
         dump(node.name, fd)
         if not varDeclSpecialCase:

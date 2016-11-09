@@ -91,9 +91,12 @@ class VarDecl(AstNode):
         self.name = name
         self.id = _DeclID
         _DeclID = _DeclID + 1
+        self.array = []
 
     def children(self):
         yield self.type
+        for x in self.array:
+            yield x
         yield self.name
 
     def desc(self):
@@ -102,6 +105,10 @@ class VarDecl(AstNode):
     def getType(self):
         """returns type of this variable declaration"""
         return self.type
+    
+    def addArray(self, arr):
+        """ adds the array index expressions to the list """
+        self.array = arr
 
 
 class Function(AstNode):
@@ -341,6 +348,19 @@ class FuncCall(Expression):
             yield x
 
 
+class ArrayAccess(Expression):
+    """ class for acessing the array
+    
+    Members:
+    expr: list of index expressions"""
+    def __init__(self, left, expr):
+        super(ArrayAccess, self).__init__()
+        self.left = left
+        self.expr = expr
+
+    def children(self):
+        yield self.left
+        yield self.expr
 
 class ArithExpr(Expression):
     """class representing an arithmetic expression
