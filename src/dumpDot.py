@@ -130,6 +130,7 @@ def dumpDot(node, fd):
     elif isinstance(node, LValue):
         fd.write(str(my_id) + ";\n")
         fd.write(str(my_id) + " [label=\"")
+        fd.write("id: ")
         dumpAST.dump(node.name, fd)
         fd.write("\"];\n")
     elif isinstance(node, IntLiteral) \
