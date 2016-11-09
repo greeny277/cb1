@@ -29,10 +29,8 @@ _dot_id = 0
 
 def dumpDot(node, fd):
     global _dot_id
-    print("GLOBAL DOTID: " + str(_dot_id))
     my_id = _dot_id
     _dot_id = _dot_id + 1
-    print("My DOTID: " + str(my_id))
     if isinstance(node, Program):
         fd.write("digraph AST {\n")
         fd.write(str(my_id) + " [label=\"program\"];\n")
