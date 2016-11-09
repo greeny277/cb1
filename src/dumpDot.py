@@ -20,7 +20,7 @@ from ast import \
     CondExpr
 
 from common import InternalError
-
+import dumpAST
 """ Global id for dot file
 """
 _dot_id = 0
@@ -56,15 +56,13 @@ def dumpDot(node, fd):
         dumpDot(node.block, fd)
     elif isinstance(node, VarDecl):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"VarDecl\"];\n")
-        fd.write(str(my_id) + " -> ")
-        fd.write(node.type)
-        for l in node.array:
-            fd.write("[")
-            fd.write(l)
-            fd.write("]")
-        fd.write(str(my_id) + " -> ")
-        dumpDot(node.name, fd)
+        fd.write(str(my_id) + " [label=\"VarDecl: ")
+        dumpAST.dump(node.type, fd)
+        for x in node.array:
+            fd.write("[] ")
+        fd.write("id: ")
+        dumpAST.dump(node.name, fd)
+        fd.write("\"];\n")
     elif isinstance(node, Identifier):
         fd.write(str(my_id) + ";\n")
         fd.write(str(my_id) + " [label=\"")
