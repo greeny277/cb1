@@ -47,7 +47,7 @@ def dumpDot(node, fd):
         sep = ""
         for c in node.arglist:
             fd.write(sep)
-            fd.wrote(c.type.desc() + " ")
+            fd.write(c.type.desc() + " ")
             fd.write(c.name)
             sep = ", "
         fd.write(")")
@@ -57,9 +57,14 @@ def dumpDot(node, fd):
     elif isinstance(node, VarDecl):
         fd.write(str(my_id) + ";\n")
         fd.write(str(my_id) + " [label=\"VarDecl\"];\n")
-        for c in node.children():
-            fd.write(str(my_id) + " -> ")
-            dumpDot(c, fd)
+        fd.write(str(my_id) + " -> ")
+        fd.write(node.type)
+        for l in node.array:
+            fd.write("[")
+            fd.write(l)
+            fd.write("]")
+        fd.write(str(my_id) + " -> ")
+        dumpDot(node.name, fd)
     elif isinstance(node, Identifier):
         fd.write(str(my_id) + ";\n")
         fd.write(str(my_id) + " [label=\"")
