@@ -14,8 +14,6 @@ from common import InternalError
 # The parser generator is called PLY,
 # please refer to the internet for documentation.
 
-array_dict = {}
-
 def p_program(p):
     '''program : program vardecl ';'
                | program funcdecl
@@ -49,8 +47,6 @@ def p_vardecl(p):
                | type arraydecl identifier'''
     if len(p) == 4:
         # declaration of an array
-        # mark identifier as an array
-        array_dict[identifier] = 1
         p[0] = ast.VarDecl(p[1], p[3]).addloc(p.lineno(1))
         p[0].addArray(p[2])
     else:
@@ -163,7 +159,7 @@ def p_whilestmt(p):
 
 
 def p_assgnstmt(p):
-    '''assgnstmt : lvalue AsSIGN arith_expr ';' '''
+    '''assgnstmt : lvalue ASSIGN arith_expr ';' '''
     p[0] = ast.AssignStmt(p[1], p[3]).addloc(p.lineno(1))
 
 
@@ -174,8 +170,6 @@ def p_lvalue(p):
         p[0] = ast.LValue(p[1]).addloc(p.lineno(1))
     else:
         p[0] = p[1]
-        if p[0].name in array_dict:
-            p_error(p)
         p[0].addArrayDeref(p[3])
 
 
