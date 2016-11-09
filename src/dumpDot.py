@@ -62,8 +62,8 @@ def dumpDot(node, fd):
         fd.write(str(my_id) + " [label=\"VarDecl: ")
         dumpAST.dump(node.type, fd)
         for x in node.array:
-            fd.write("[] ")
-        fd.write("id: ")
+            fd.write("[]")
+        fd.write(" id: ")
         dumpAST.dump(node.name, fd)
         fd.write("\"];\n")
     elif isinstance(node, Identifier):
