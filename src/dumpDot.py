@@ -59,10 +59,13 @@ def dumpDot(node, fd):
         dumpDot(node.block, fd)
     elif isinstance(node, VarDecl):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"VarDecl\"];\n")
-        for c in node.children():
-            fd.write(str(my_id) + " -> ")
-            dumpDot(c, fd)
+        fd.write(str(my_id) + " [label=\"VarDecl: ")
+        dumpAST.dump(node.type, fd)
+        for x in node.array:
+            fd.write("[]")
+        fd.write(" id: ")
+        dumpAST.dump(node.name, fd)
+        fd.write("\"];\n")
     elif isinstance(node, Identifier):
         fd.write(str(my_id) + ";\n")
         fd.write(str(my_id) + " [label=\"id: ")
@@ -125,11 +128,10 @@ def dumpDot(node, fd):
             dumpDot(c, fd)
     elif isinstance(node, LValue):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"LValue\"];\n")
-        fd.write(str(my_id) + " -> ")
-        for c in node.children():
-            fd.write(str(my_id) + " -> ")
-            dumpDot(c, fd)
+        fd.write(str(my_id) + " [label=\"")
+        fd.write("id: ")
+        dumpAST.dump(node.name, fd)
+        fd.write("\"];\n")
     elif isinstance(node, IntLiteral) \
             or isinstance(node, FloatLiteral):
         fd.write(str(my_id) + ";\n")
