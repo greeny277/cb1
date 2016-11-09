@@ -6,8 +6,8 @@ import argparse
 import os
 import sys
 import dumpAST
-import common
 import dumpDot
+import common
 
 from common import InputError
 

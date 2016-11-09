@@ -21,6 +21,7 @@ from ast import \
 
 from common import InternalError
 import dumpAST
+
 """ Global id for dot file
 """
 _dot_id = 0
@@ -41,17 +42,19 @@ def dumpDot(node, fd):
         fd.write("}")
     elif isinstance(node, Function):
         fd.write(str(my_id) + ";\n")
-        fd.write(str(my_id) + " [label=\"")
-        fd.write(node.type.desc() + " ")
-        fd.write(node.name.name + "(")
-        sep = ""
-        for c in node.arglist:
-            fd.write(sep)
-            fd.write(c.type.desc() + " ")
-            fd.write(c.name)
-            sep = ", "
-        fd.write(")")
+        fd.write(str(my_id) + " [label=\"FuncDecl: ")
+        dumpAST.dump(node.type, fd)
+        fd.write(" id: ")
+        dumpAST.dump(node.name, fd)
         fd.write("\"];\n")
+        fd.write(str(my_id) + " -> ")
+        parlist_id = _dot_id
+        _dot_id = _dot_id + 1
+        fd.write(str(parlist_id) + ";\n")
+        fd.write(str(parlist_id) + " [label=\"ParList\"];\n")
+        for c in node.arglist:
+            fd.write(str(parlist_id) + " -> ")
+            dumpDot(c, fd)
         fd.write(str(my_id) + " -> ")
         dumpDot(node.block, fd)
     elif isinstance(node, VarDecl):
