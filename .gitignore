@@ -9,3 +9,4 @@ src/parsetab.py
 *.dot
 *.AST
 *.CIL
+testsuite
