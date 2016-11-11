@@ -29,30 +29,42 @@ def foldingAST(node):
         r = foldingAST(node.right)
         if isinstance(l, IntLiteral) and isinstance(r, IntLiteral):
             if node.op.val == "+":
-                node = IntLiteral(str(float(l.val) + float(r.val)))
-                return node
+                return IntLiteral(str(float(l.val) + float(r.val)))
             elif node.op.val == "*":
-                node = IntLiteral(str(float(l.val) * float(r.val)))
-                return node
+                return IntLiteral(str(float(l.val) * float(r.val)))
             elif node.op.val == "-":
-                node = IntLiteral(str(float(l.val) - float(r.val)))
-                return node
-            else:
-                node = IntLiteral(str(float(l.val) / float(r.val)))
-                return node
+                return IntLiteral(str(float(l.val) - float(r.val)))
+            elif node.op.val == "/":
+                return IntLiteral(str(float(l.val) / float(r.val)))
         if isinstance(l, FloatLiteral) and isinstance(r, FloatLiteral):
             if node.op.val == "+":
-                node = FloatLiteral(str(float(l.val) + float(r.val)))
-                return node
+                return FloatLiteral(str(float(l.val) + float(r.val)))
             elif node.op.val == "*":
-                node = FloatLiteral(str(float(l.val) * float(r.val)))
-                return node
+                return FloatLiteral(str(float(l.val) * float(r.val)))
             elif node.op.val == "-":
-                node = FloatLiteral(str(float(l.val) - float(r.val)))
-                return node
-            else:
-                node = FloatLiteral(str(float(l.val) / float(r.val)))
-                return node
+                return FloatLiteral(str(float(l.val) - float(r.val)))
+            elif node.op.val == "/":
+                return FloatLiteral(str(float(l.val) / float(r.val)))
+        node.left = l
+        node.right = r
+        return node
+    elif isinstance(node, ReturnStmt):
+        node.expr = foldingAST(node.expr)
+        return node
+    elif isinstance(node, AssignStmt):
+        node.expr = foldingAST(node.expr)
+        return node
+    elif isinstance(node, CondExpr):
+        node.left = foldingAST(node.left)
+        node.right = foldingAST(node.right)
+        return node
+    elif isinstance(node, VarDecl):
+        new_list = []
+        for x in node.array:
+            new_list.append(foldingAST(x))
+        node.array = new_list
+        return node
     else:
         for c in node.children():
             foldingAST(c)
+        return node
