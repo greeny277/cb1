@@ -8,6 +8,7 @@ import sys
 import dumpAST
 import dumpDot
 import common
+import constFold
 
 from common import InputError
 
@@ -73,7 +74,14 @@ def main(arguments):
         # file name of DOT Dump
         x = e_parser.doParsing(inputfile)
 
+        if myargs.dotify_ast is not None:
+            dotdumpfile = inputfilebasename + ".dot"
+            ddf = open(dotdumpfile, "w")
+            dumpDot.dumpDot(x, ddf)
+            ddf.close()
+
         # TODO: fold constants
+        constFold.foldingAST(x)
 
         # TODO: resolve declarations
 
@@ -86,8 +94,7 @@ def main(arguments):
             adf.close()
 
         if myargs.dotify_ast is not None:
-            # TODO
-            dotdumpfile = inputfilebasename + ".dot"
+            dotdumpfile = inputfilebasename + ".simplfied" + ".dot"
             ddf = open(dotdumpfile, "w")
             dumpDot.dumpDot(x, ddf)
             ddf.close()
