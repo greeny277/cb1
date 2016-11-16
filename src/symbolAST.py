@@ -23,6 +23,7 @@ from ast import \
 from common import Variable, InputError
 s = symboltable.SymbolTable()
 
+
 def traverse(node):
     """traverse the AST, creating entries for the symbol table and check if vars
     are declared etc.
@@ -61,7 +62,7 @@ def traverse(node):
         try:
             node.decl = s.queryVarName(node.name)
         except InputError as err:
-            print(format(err))
+            print(format(err) + ": " + node.name)
             sys.exit(1)
     else:
         for c in node.children():
