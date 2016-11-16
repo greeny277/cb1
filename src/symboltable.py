@@ -18,7 +18,7 @@ from ast import \
     FuncCall, \
     CondExpr
 
-from common import Variable, InternalError
+from common import Variable, InputError
 
 
 class SymbolTable(object):
@@ -65,7 +65,7 @@ class SymbolTable(object):
         elif checkVar[0].getDepth() != self.currentDepth:
             self.hashTable[variable.name] = [variable]+checkVar
         else:
-            raise InternalError("Double variable declaration in same scope")
+            raise InputError("Double variable declaration in same scope")
         variable.setDepth(self.currentDepth)
         variable.setPreviuos(self.lastEntry)
         self.lastEntry = variable
@@ -80,6 +80,6 @@ class SymbolTable(object):
         """
         checkVar = self.hashTable.get(name)
         if checkVar is None:
-            return None
+            raise InputError("Variable not declared")
         else:
             return checkVar[0]
