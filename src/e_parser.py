@@ -14,6 +14,7 @@ from common import InternalError
 # The parser generator is called PLY,
 # please refer to the internet for documentation.
 
+
 def p_program(p):
     '''program : program vardecl ';'
                | program funcdecl
@@ -83,7 +84,6 @@ def p_type_primitive(p):
         raise common.InputError("invalid Type: " + repr(p[1]))
     if len(p) == 3:
         p[0] = p[0].getArrayType(p[2])
-
 
 
 def p_parList_single(p):
