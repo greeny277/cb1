@@ -44,8 +44,14 @@ class SymbolTable(object):
         if self.lastEntry is None:
             return
 
-        while self.lastEntry.isTos() is False:
-            del self.hashTable[self.lastEntry.name]
+        while self.lastEntry is not None and self.lastEntry.isTos() is False:
+            val = self.hashTable[self.lastEntry.name]
+            if len(val) == 1:
+                del self.hashTable[self.lastEntry.name]
+            else:
+                val.pop(0)
+                self.hashTable[self.lastEntry.name] = val
+
             self.lastEntry = self.lastEntry.getPreviuos()
 
         self.lastEntry.setTos(False)
