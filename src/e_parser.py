@@ -71,11 +71,14 @@ def p_identifier(p):
 def p_type_primitive(p):
     '''type : TKREAL
            | TKINT
+           | TKBOOL
            | type arraydecl '''
     if p[1] == "int":
         p[0] = common.Type.getIntType()
     elif p[1] == "real":
         p[0] = common.Type.getRealType()
+    elif p[1] == "bool":
+        p[0] = common.Type.getBoolType()
     else:
         raise common.InputError("invalid Type: " + repr(p[1]))
     if len(p) == 3:
