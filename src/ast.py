@@ -81,7 +81,8 @@ class VarDecl(AstNode):
     Members:
     name: name of variable
     type: type of variable
-    id: unique id of this declaration"""
+    id: unique id of this declaration
+    array: list of arith expressions defining index"""
 
     def __init__(self, _type, name):
         # pylint: disable=global-statement

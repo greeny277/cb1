@@ -94,6 +94,8 @@ def main(arguments):
             adf.close()
 
         if myargs.dotify_ast is not None:
+            """ Save AST after const folding
+            """
             dotdumpfile = inputfilebasename + ".simplfied" + ".dot"
             ddf = open(dotdumpfile, "w")
             dumpDot.dumpDot(x, ddf)
