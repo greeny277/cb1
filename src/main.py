@@ -9,6 +9,7 @@ import dumpAST
 import dumpDot
 import common
 import constFold
+import symbolAST
 
 from common import InputError
 
@@ -84,6 +85,7 @@ def main(arguments):
         constFold.foldingAST(x)
 
         # TODO: resolve declarations
+        symbolAST.traverse(x)
 
         # TODO: check types
 
