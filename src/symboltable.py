@@ -54,7 +54,8 @@ class SymbolTable(object):
 
             self.lastEntry = self.lastEntry.getPreviuos()
 
-        self.lastEntry.setTos(False)
+        if self.lastEntry is not None:
+            self.lastEntry.setTos(False)
         self.currentDepth = self.currentDepth - 1
 
     def insertVariable(self, variable):
@@ -79,7 +80,7 @@ class SymbolTable(object):
     def queryVarName(self, name):
         """
         Members:
-        name: Identifier of a variable or function
+        name: Name of a variable or function
 
         Return:
         Variable object declared in most inner scope or None
@@ -89,3 +90,4 @@ class SymbolTable(object):
             raise InputError("Variable not declared")
         else:
             return checkVar[0]
+

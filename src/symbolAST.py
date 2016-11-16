@@ -31,17 +31,17 @@ def traverse(node):
 
     if isinstance(node, Function):
         s.enterScope()
-        var = Variable(node.name, node.type)
+        var = Variable(node.name.name, node.type)
         try:
             s.insertVariable(var)
         except InputError as err:
-            print(format(err) + ": " + node.name)
+            print(format(err) + ": " + node.name.name)
         for a in node.arglist:
-            argListVar = Variable(a.name, a.type)
+            argListVar = Variable(a.name.name, a.type)
             try:
                 s.insertVariable(argListVar)
             except InputError as err:
-                print(format(err) + ": " + node.name)
+                print(format(err) + ": " + node.name.name)
                 sys.exit(1)
         traverse(node.block)
         s.leaveScope()
@@ -51,11 +51,11 @@ def traverse(node):
             traverse(l)
         s.leaveScope()
     elif isinstance(node, VarDecl):
-        var = Variable(node.name, node.type)
+        var = Variable(node.name.name, node.type)
         try:
             s.insertVariable(var)
         except InputError as err:
-            print(format(err) + ": " + node.name)
+            print(format(err) + ": " + node.name.name)
             sys.exit(1)
     elif isinstance(node, Identifier):
         """ check if identifier exists in symboltable"""
