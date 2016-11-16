@@ -70,17 +70,17 @@ def p_identifier(p):
 
 def p_type_primitive(p):
     '''type : TKREAL
-           | TKINT'''
+           | TKINT
+           | type arraydecl '''
     if p[1] == "int":
         p[0] = common.Type.getIntType()
     elif p[1] == "real":
         p[0] = common.Type.getRealType()
     else:
         raise common.InputError("invalid Type: " + repr(p[1]))
+    if len(p) == 3:
+        p[0] = p[0].getArrayType(p[2])
 
-
-# TODO: production
-#    type : type '[' arith_expr ']'
 
 
 def p_parList_single(p):
