@@ -24,6 +24,41 @@ class InputError(Error):
         super(InputError, self).__init__(msg + (" @%d" % (line)))
 
 
+class Variable(object):
+    """ class for representing association between var/func name and its type
+    Members:
+    name: identifier of a function or variable
+    type: type of a func/var, use Type class to represent the type
+    depth: the current depth on stack
+    tos: marks if the variable is on then top of the stack
+    prev: pointer to the previous element on the stack
+    """
+    def __init__(self, name, _type, depth, tos, prev):
+        self.name = name
+        self._type = _type
+        self.depth = depth
+        self.tos = tos
+        self.prev = prev
+
+    def setPreviuos(self, prev):
+        self.prev = prev
+
+    def getPreviuos(self):
+        return self.prev
+
+    def setDepth(self, depth):
+        self.depth = depth
+
+    def getDepth(self):
+        return self.depth
+
+    def setTos(self, tos):
+        self.tos = tos
+
+    def isTos(self):
+        return self.tos
+
+
 class Type(object):
     """class for representing a Type in E """
     def __init__(self, typename, _dims=[]):
