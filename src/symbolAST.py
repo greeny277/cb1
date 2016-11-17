@@ -22,20 +22,23 @@ from ast import \
 
 from common import Variable, InputError
 s = symboltable.SymbolTable()
+lib = None
 
 
-def traverse(node):
-    """traverse the AST, creating entries for the symbol table and check if vars
-    are declared etc.
-    """
+def setLibAST(libAST):
+    global lib
+    lib = libAST
 
+
+def initLib(node):
     if isinstance(node, Function):
-        s.enterScope()
         var = Variable(node.name.name, node.type)
         try:
             s.insertVariable(var)
         except InputError as err:
             print(format(err) + ": " + node.name.name)
+        
+        s.enterScope()
         for a in node.arglist:
             argListVar = Variable(a.name.name, a.type)
             try:
@@ -43,8 +46,37 @@ def traverse(node):
             except InputError as err:
                 print(format(err) + ": " + node.name.name)
                 sys.exit(1)
-        traverse(node.block)
         s.leaveScope()
+    else:
+        for c in node.children():
+            initLib(c)
+
+
+def traverse(node):
+    """traverse the AST, creating entries for the symbol table and check if vars
+    are declared etc.
+    """
+    if isinstance(node, Program):
+        initLib(lib)
+    if isinstance(node, Function):
+        var = Variable(node.name.name, node.type)
+        try:
+            s.insertVariable(var)
+        except InputError as err:
+            print(format(err) + ": " + node.name.name)
+        
+        s.enterScope()
+        for a in node.arglist:
+            argListVar = Variable(a.name.name, a.type)
+            try:
+                s.insertVariable(argListVar)
+            except InputError as err:
+                print(format(err) + ": " + node.name.name)
+                sys.exit(1)
+        s.leaveScope()
+
+        traverse(node.block)
+
     elif isinstance(node, Block):
         s.enterScope()
         for l in node.children():

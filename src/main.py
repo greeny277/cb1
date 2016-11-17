@@ -75,6 +75,9 @@ def main(arguments):
         # file name of DOT Dump
         x = e_parser.doParsing(inputfile)
 
+        # initialize libriary functions
+        lib = e_parser.doParsing('lib.e')
+
         if myargs.dotify_ast is not None:
             dotdumpfile = inputfilebasename + ".dot"
             ddf = open(dotdumpfile, "w")
@@ -83,6 +86,9 @@ def main(arguments):
 
         # TODO: fold constants
         constFold.foldingAST(x)
+
+        # init the lib
+        symbolAST.setLibAST(lib)
 
         # TODO: resolve declarations
         symbolAST.traverse(x)
