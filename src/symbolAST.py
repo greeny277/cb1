@@ -63,9 +63,10 @@ def traverse(node):
             except InputError as err:
                 print(format(err) + ": " + node.name.name)
                 sys.exit(1)
-        s.leaveScope()
 
         traverse(node.block)
+        s.leaveScope()
+
 
     elif isinstance(node, Block):
         s.enterScope()
