@@ -32,13 +32,15 @@ class Variable(object):
     depth: the current depth on stack
     tos: marks if the variable is on then top of the stack
     prev: pointer to the previous element on the stack
+    decl: VarDecl or Function this Variable refers to
     """
-    def __init__(self, name, _type, depth=None, tos=False, prev=None):
+    def __init__(self, name, _type, decl, depth=None, tos=False, prev=None):
         self.name = name
         self._type = _type
         self.depth = depth
         self.tos = tos
         self.prev = prev
+        self.decl = decl
 
     def setPreviuos(self, prev):
         self.prev = prev
@@ -57,6 +59,9 @@ class Variable(object):
 
     def isTos(self):
         return self.tos
+
+    def getDecl(self):
+        return self.decl
 
 
 class Type(object):

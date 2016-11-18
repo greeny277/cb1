@@ -32,7 +32,7 @@ def setLibAST(libAST):
 
 def initLib(node):
     if isinstance(node, Function):
-        var = Variable(node.name.name, node.type)
+        var = Variable(node.name.name, node.type, node)
         try:
             s.insertVariable(var)
         except InputError as err:
@@ -52,7 +52,7 @@ def traverse(node):
         initLib(lib)
         """print("DEBUG: End init lib")"""
     if isinstance(node, Function):
-        var = Variable(node.name.name, node.type)
+        var = Variable(node.name.name, node.type, node)
         try:
             s.insertVariable(var)
         except InputError as err:
@@ -61,7 +61,7 @@ def traverse(node):
 
         s.enterScope()
         for a in node.arglist:
-            argListVar = Variable(a.name.name, a.type)
+            argListVar = Variable(a.name.name, a.type, a)
             try:
                 s.insertVariable(argListVar)
             except InputError as err:
@@ -71,14 +71,13 @@ def traverse(node):
         traverse(node.block)
         s.leaveScope()
 
-
     elif isinstance(node, Block):
         s.enterScope()
         for l in node.children():
             traverse(l)
         s.leaveScope()
     elif isinstance(node, VarDecl):
-        var = Variable(node.name.name, node.type)
+        var = Variable(node.name.name, node.type, node)
         try:
             s.insertVariable(var)
         except InputError as err:
@@ -87,7 +86,7 @@ def traverse(node):
     elif isinstance(node, Identifier):
         """ check if identifier exists in symboltable"""
         try:
-            node.decl = s.queryVarName(node.name)
+            node.setDecl((s.queryVarName(node.name)).getDecl())
         except InputError as err:
             print(format(err) + ": " + node.name)
             sys.exit(1)
