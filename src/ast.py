@@ -337,7 +337,11 @@ class FloatLiteral(Literal):
 
 
 class FuncCall(Expression):
-    """Declaration of a function"""
+    """Declaration of a function call
+    Members:
+    func_name: identifier of the function
+    par_list: parameter list of the function
+    """
     def __init__(self, func_name, par_list):
         super(FuncCall, self).__init__()
         self.func_name = func_name
@@ -408,3 +412,33 @@ class Operator(AstNode):
 
     def desc(self):
         return self.val
+
+
+class ToReal(Expression):
+    """class for representing conversion from int to real
+    Members:
+    successor: ast node to be converted, can be: subexpression or identifier
+    type: return type of this conversion
+    """
+    def __init__(self, successor):
+        super(ToReal, self).__init__()
+        self.type = Type.getRealType()
+        self.successor = successor
+
+    def children(self):
+        yield self.successor
+
+
+class ToInt(Expression):
+    """class for representing conversion from real to int
+    Members:
+    successor: ast node to be converted, can be: subexpression or identifier
+    type: return type of this conversion
+    """
+    def __init__(self, successor):
+        super(ToInt, self).__init__()
+        self.type = Type.getIntType()
+        self.successor = successor
+
+    def children(self):
+        yield self.successor
