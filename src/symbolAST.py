@@ -37,16 +37,6 @@ def initLib(node):
             s.insertVariable(var)
         except InputError as err:
             print(format(err) + ": " + node.name.name)
-        
-        s.enterScope()
-        for a in node.arglist:
-            argListVar = Variable(a.name.name, a.type)
-            try:
-                s.insertVariable(argListVar)
-            except InputError as err:
-                print(format(err) + ": " + node.name.name)
-                sys.exit(1)
-        s.leaveScope()
     else:
         for c in node.children():
             initLib(c)
