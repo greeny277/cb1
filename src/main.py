@@ -76,7 +76,7 @@ def main(arguments):
         x = e_parser.doParsing(inputfile)
 
         # initialize libriary functions
-        lib = e_parser.doParsing('lib.e')
+        lib = e_parser.doParsing('testsuite/lib.e')
 
         if myargs.dotify_ast is not None:
             dotdumpfile = inputfilebasename + ".dot"
