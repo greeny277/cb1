@@ -37,6 +37,7 @@ def initLib(node):
             s.insertVariable(var)
         except InputError as err:
             print(format(err) + ": " + node.name.name)
+            sys.exit(1)
     else:
         for c in node.children():
             initLib(c)
@@ -56,6 +57,7 @@ def traverse(node):
             s.insertVariable(var)
         except InputError as err:
             print(format(err) + ": " + node.name.name)
+            sys.exit(1)
 
         s.enterScope()
         for a in node.arglist:
