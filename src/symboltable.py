@@ -47,12 +47,16 @@ class SymbolTable(object):
         while self.lastEntry is not None and self.lastEntry.depth == self.currentDepth and self.lastEntry.isTos() is False:
             val = self.hashTable[self.lastEntry.name]
             if len(val) == 1:
+                """print("DEBUG: Delete Variable: " + self.lastEntry.name + " in Depth " +
+                        str(self.currentDepth))"""
                 del self.hashTable[self.lastEntry.name]
             else:
                 val.pop(0)
                 self.hashTable[self.lastEntry.name] = val
 
             self.lastEntry = self.lastEntry.getPreviuos()
+            """print("DEBUG: Next value in stack: Name: " + self.lastEntry.name + " Depth: " +
+                    str(self.lastEntry.depth) + " TOS: " + str(self.lastEntry.isTos()))"""
 
         self.currentDepth = self.currentDepth - 1
         if self.lastEntry is not None and self.currentDepth == self.lastEntry.depth:
@@ -66,6 +70,9 @@ class SymbolTable(object):
         Returns nothing, but adds when possible a
         new variable to the internal hashtable
         """
+
+        """print("DEBUG: Adding Variablename " + variable.name + " in level: " +
+                str(self.currentDepth))"""
         checkVar = self.hashTable.get(variable.name)
         if checkVar is None:
             self.hashTable[variable.name] = [variable]

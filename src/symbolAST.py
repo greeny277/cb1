@@ -47,14 +47,16 @@ def traverse(node):
     are declared etc.
     """
     if isinstance(node, Program):
+        """print("DEBUG: Start init lib")"""
         initLib(lib)
+        """print("DEBUG: End init lib")"""
     if isinstance(node, Function):
         var = Variable(node.name.name, node.type)
         try:
             s.insertVariable(var)
         except InputError as err:
             print(format(err) + ": " + node.name.name)
-        
+
         s.enterScope()
         for a in node.arglist:
             argListVar = Variable(a.name.name, a.type)
