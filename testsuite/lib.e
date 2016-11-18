@@ -18,6 +18,9 @@ int time() {
 
 }
 
+int writeInt(int i) {
+
+}
 int writeReal(real r) {
 
 }
