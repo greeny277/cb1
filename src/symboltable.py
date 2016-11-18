@@ -44,7 +44,7 @@ class SymbolTable(object):
         if self.lastEntry is None:
             return
 
-        while self.lastEntry is not None and self.lastEntry.isTos() is False:
+        while self.lastEntry is not None and self.lastEntry.depth == self.currentDepth and self.lastEntry.isTos() is False:
             val = self.hashTable[self.lastEntry.name]
             if len(val) == 1:
                 del self.hashTable[self.lastEntry.name]
@@ -54,9 +54,9 @@ class SymbolTable(object):
 
             self.lastEntry = self.lastEntry.getPreviuos()
 
-        if self.lastEntry is not None:
-            self.lastEntry.setTos(False)
         self.currentDepth = self.currentDepth - 1
+        if self.lastEntry is not None and self.currentDepth == self.lastEntry.depth:
+            self.lastEntry.setTos(False)
 
     def insertVariable(self, variable):
         """
