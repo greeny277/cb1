@@ -33,7 +33,7 @@ class Variable(object):
     tos: marks if the variable is on then top of the stack
     prev: pointer to the previous element on the stack
     """
-    def __init__(self, name, _type, depth=None, tos=None, prev=None):
+    def __init__(self, name, _type, depth=None, tos=False, prev=None):
         self.name = name
         self._type = _type
         self.depth = depth
