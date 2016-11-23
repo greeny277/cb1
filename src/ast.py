@@ -205,15 +205,31 @@ class AssignStmt(Statement):
 
     Members:
     lvalue: target of this assignment
-    expr: source value of this assignment"""
-    def __init__(self, lvalue, expr):
+    expr: source value of this assignment
+    type_left: type of lvalue
+    type_right: type of expr """
+    def __init__(self, lvalue, expr, type_left=None, type_right=None):
         super(AssignStmt, self).__init__()
         self.lvalue = lvalue
         self.expr = expr
+        self.type_left = type_left
+        self.type_right = type_right
 
     def children(self):
         yield self.lvalue
         yield self.expr
+
+    def set_left_type(self, t):
+        self.type_left = t
+
+    def get_left_type(self, t):
+        return self.type_left
+
+    def set_right_type(self, t):
+        self.type_right = t
+
+    def get_right_type(self, t):
+        return self.type_right
 
 
 class IfStmt(Statement):
