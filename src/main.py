@@ -10,6 +10,7 @@ import dumpDot
 import common
 import constFold
 import symbolAST
+import typeCheck
 
 from common import InputError
 
@@ -75,6 +76,9 @@ def main(arguments):
         # file name of DOT Dump
         x = e_parser.doParsing(inputfile)
 
+        # This ast dumping is for debugging purposes,
+        # you may remove it.
+        dumpAST.dump(x, sys.stdout)
         # initialize libriary functions
         lib = e_parser.doParsing(os.path.dirname(__file__) + '/libs/lib.e')
         if myargs.dotify_ast is not None:
@@ -92,7 +96,6 @@ def main(arguments):
         # TODO: resolve declarations
         symbolAST.traverse(x)
 
-        # TODO: check types
 
         if myargs.dump_ast is not None:
             adf = open(astdumpfile, "w")
@@ -108,9 +111,18 @@ def main(arguments):
             dumpDot.dumpDot(x, ddf)
             ddf.close()
 
-        # This ast dumping is for debugging purposes,
-        # you may remove it.
-        dumpAST.dump(x, sys.stdout)
+        # TODO: check types
+        typeCheck.typeChecking(x)
+
+        if myargs.dotify_ast is not None:
+            """ Save AST after const folding
+            """
+            dotdumpfile = inputfilebasename + ".typing" + ".dot"
+            ddf = open(dotdumpfile, "w")
+            dumpDot.dumpDot(x, ddf)
+            ddf.close()
+
+
 
         # TODO: intermediate code generation
 

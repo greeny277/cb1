@@ -111,6 +111,10 @@ class VarDecl(AstNode):
         """ adds the array index expressions to the list """
         self.array = arr
 
+    def getArray(self):
+        """ Return array index expressiopns"""
+        return self.array
+
 
 class Function(AstNode):
     """Function Definition.
@@ -165,6 +169,10 @@ class Identifier(AstNode):
         """sets reference to the declaration this
         identifier refers to"""
         self.decl = decl
+
+    def getDecl(self):
+        """Return decl object"""
+        return self.decl
 
     def desc(self):
         if self.decl is not None:
@@ -317,6 +325,9 @@ class LValue(Expression):
     def addArrayDeref(self, ad):
         """adds an array access to this lvalue"""
         self.arrayDeref.append(ad)
+    def getArrayDeref(self):
+        """return array access list"""
+        return self.arrayDeref
 
     def desc(self):
         return self.name.desc()
