@@ -17,9 +17,11 @@ from ast import \
     Operator, \
     ArithExpr, \
     FuncCall, \
-    CondExpr
+    CondExpr, \
+    ToReal, \
+    ToInt
 
-from common import InternalError
+
 import dumpAST
 
 """ Global id for dot file
@@ -104,7 +106,6 @@ def dumpDot(node, fd):
         fd.write(str(my_id) + " -> " + str(else_id) + ";\n")
         fd.write(str(else_id) + " [label=\"ELSE\"];\n")
 
-
         fd.write(str(then_id) + " -> ")
         dumpDot(node.trueblock, fd)
         fd.write(str(cond_id) + " -> ")
@@ -165,6 +166,16 @@ def dumpDot(node, fd):
         for c in node.par_list:
             fd.write(str(arglist_id) + " -> ")
             dumpDot(c, fd)
+    elif isinstance(node, ToReal):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + " [label=\"ToReal\"];\n")
+        fd.write(str(my_id) + " -> ")
+        dumpDot(node.successor, fd)
+    elif isinstance(node, ToInt):
+        fd.write(str(my_id) + ";\n")
+        fd.write(str(my_id) + " [label=\"ToInt\"];\n")
+        fd.write(str(my_id) + " -> ")
+        dumpDot(node.successor, fd)
     else:
         print("-----------MISSING IMPLEMENTATION-------------")
         print(type(node))
