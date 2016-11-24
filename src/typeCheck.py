@@ -54,6 +54,11 @@ def typeChecking(node):
         leftType = typeChecking(node.left)
         rightType = typeChecking(node.right)
 
+        if leftType.isArray():
+            leftType = leftType.getBaseType()
+        if rightType.isArray():
+            rightType = leftType.getBaseType()
+
         if leftType != rightType:
             if leftType == Type.getIntType():
                 '''Add ToReal node on left side'''
@@ -61,9 +66,21 @@ def typeChecking(node):
             else:
                 '''Add ToReal node on right side'''
                 node.right = ToReal(node.right)
+            return Type.getRealType()
+        if leftType == Type.getIntType():
+            return Type.getIntType()
+        else:
+            return Type.getRealType()
     elif isinstance(node, AssignStmt):
         leftType = typeChecking(node.lvalue)
         rightType = typeChecking(node.expr)
+
+
+        if leftType.isArray():
+            leftType = leftType.getBaseType()
+        if rightType.isArray():
+            rightType = leftType.getBaseType()
+
         if leftType != rightType:
             if leftType == Type.getIntType():
                 '''Add ToInt cast on right side'''
