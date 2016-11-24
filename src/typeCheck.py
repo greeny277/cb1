@@ -86,9 +86,17 @@ def typeChecking(node):
                 raise InputError("Invalid array access in VarDecl: " + str(node.name))
     elif isinstance(node, LValue):
         accessors = node.getArrayDeref()
+        decl = node.name.getDecl()
+        if isinstance(decl, VarDecl):
+            if len(node.getArrayDeref()) != len(decl.getArray()):
+                raise InputError("Invalid array access in LValuee: " + str(node.name))
+
         for a in accessors:
             if Type.getRealType() == typeChecking(a):
                 raise InputError("Invalid array access in LValuee: " + str(node.name))
+            else:
+                typeChecking(a)
+
         if isinstance(node.name.getDecl(), Function):
                 raise InputError("The function misses its arguments: " + str(node.name))
 
