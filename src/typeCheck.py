@@ -89,11 +89,11 @@ def typeChecking(node):
         decl = node.name.getDecl()
         if isinstance(decl, VarDecl):
             if len(node.getArrayDeref()) != len(decl.getArray()):
-                raise InputError("Invalid array access in LValuee: " + str(node.name))
+                raise InputError("Invalid array access in LValue: " + str(node.name))
 
         for a in accessors:
             if Type.getRealType() == typeChecking(a):
-                raise InputError("Invalid array access in LValuee: " + str(node.name))
+                raise InputError("Invalid array access in LValue: " + str(node.name))
             else:
                 typeChecking(a)
 
