@@ -50,12 +50,8 @@ def typeChecking(node):
             typeChecking(x)
             print("DUMMY END")
         return funcObj.getType()
-
-
-
-
     elif isinstance(node, ArithExpr):
-        leftType  = typeChecking(node.left)
+        leftType = typeChecking(node.left)
         rightType = typeChecking(node.right)
 
         if leftType != rightType:
@@ -78,6 +74,10 @@ def typeChecking(node):
     elif isinstance(node, Function):
         global functionReturnType
         functionReturnType = node.getType()
+        ''' check the arguments of the function, e.g. array forbidden '''
+        for a in node.arglist:
+            if len(a.array) != 0:
+                raise InputError("Argument is an array: " + str(node.name))
         typeChecking(node.block)
     elif isinstance(node, VarDecl):
         accessors = node.getArray()
