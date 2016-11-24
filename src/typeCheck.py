@@ -100,6 +100,8 @@ def typeChecking(node):
         if isinstance(node.name.getDecl(), Function):
                 raise InputError("The function misses its arguments: " + str(node.name))
 
+        return decl.type
+
     elif isinstance(node, Program):
         for c in node.children():
             typeChecking(c)
