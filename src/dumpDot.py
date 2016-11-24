@@ -130,6 +130,11 @@ def dumpDot(node, fd):
         fd.write(str(my_id) + " [label=\"")
         fd.write("id: ")
         dumpAST.dump(node.name, fd)
+        if len(node.arrayDeref) > 0:
+            fd.write("[")
+            for x in node.arrayDeref:
+                dumpAST.dump(x, fd)
+            fd.write("]")
         fd.write("\"];\n")
     elif isinstance(node, IntLiteral) \
             or isinstance(node, FloatLiteral):
