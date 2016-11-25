@@ -29,13 +29,13 @@ def foldingAST(node):
         r = foldingAST(node.right)
         if isinstance(l, IntLiteral) and isinstance(r, IntLiteral):
             if node.op.val == "+":
-                return IntLiteral(str(float(l.val) + float(r.val)))
+                return IntLiteral(str(int(float(l.val)) + int(float(r.val))))
             elif node.op.val == "*":
-                return IntLiteral(str(float(l.val) * float(r.val)))
+                return IntLiteral(str(int(float(l.val)) * int(float(r.val))))
             elif node.op.val == "-":
-                return IntLiteral(str(float(l.val) - float(r.val)))
+                return IntLiteral(str(int(float(l.val)) - int(float(r.val))))
             elif node.op.val == "/":
-                return IntLiteral(str(float(l.val) / float(r.val)))
+                return IntLiteral(str(int(float(l.val)) / int(float(r.val))))
         if isinstance(l, FloatLiteral) and isinstance(r, FloatLiteral):
             if node.op.val == "+":
                 return FloatLiteral(str(float(l.val) + float(r.val)))
