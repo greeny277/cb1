@@ -48,13 +48,10 @@ def traverse(node):
     are declared etc.
     """
     if isinstance(node, Program):
-        """print("DEBUG: Start init lib")"""
         initLib(lib)
-        """print("DEBUG: End init lib")"""
     if isinstance(node, Function):
         var = Variable(node.name.name, node.type, node)
         try:
-            print("DEBUG FUNCTION: " + "Name: " + node.name.name + " Type:" + str(node.type))
             s.insertVariable(var)
         except InputError as err:
             print(format(err) + ": " + node.name.name)
@@ -62,7 +59,6 @@ def traverse(node):
 
         s.enterScope()
         for a in node.arglist:
-            print("DEBUG ARGLIST: " + "Name: " + a.name.name + " Type:" + str(a.type))
             argListVar = Variable(a.name.name, a.type, a)
             try:
                 s.insertVariable(argListVar)
@@ -79,7 +75,6 @@ def traverse(node):
             traverse(l)
         s.leaveScope()
     elif isinstance(node, VarDecl):
-        print("DEBUG: ADD VarDecl: Name:" + node.name.name + " Type" + str(node.type))
         var = Variable(node.name.name, node.type, node)
         try:
             s.insertVariable(var)
@@ -91,7 +86,6 @@ def traverse(node):
         try:
             var = s.queryVarName(node.name)
             node.setDecl(var.getDecl())
-            print("DEBUG SetDecl: Node name: " + node.name + "; Decl Type " + str(type(var.getDecl())))
         except InputError as err:
             print(format(err) + ": " + node.name)
             sys.exit(1)
