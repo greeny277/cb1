@@ -5,46 +5,41 @@ from ast import \
     Function, \
     Identifier, \
     Type, \
-    Block, \
     AssignStmt, \
-    IfStmt, \
-    WhileStmt, \
     ReturnStmt, \
     LValue, \
     IntLiteral, \
     FloatLiteral, \
-    Operator, \
     ArithExpr, \
     FuncCall, \
-    CondExpr, \
     ToReal, \
     ToInt
 
-from common import Variable, InputError
+from common import InputError
 
 '''Save in this variable return type of current function'''
 functionReturnType = None
 
+
 def typeChecking(node):
     """traverse the AST and add conversion nodes"""
-
-    print("DEBUG: Type of Node:" + str(type(node)))
+    '''print("DEBUG: Type of Node:" + str(type(node)))'''
     if isinstance(node, Identifier):
         ident = node.getDecl()
-        print("DEBUG: Identifier instance: " + str(type(ident)))
+        '''print("DEBUG: Identifier instance: " + str(type(ident)))'''
         if isinstance(ident, VarDecl):
             return ident.type
         elif isinstance(ident, Function):
             ''' TODO:this call might be wrong'''
             return typeChecking(ident)
 
-
     elif isinstance(node, FuncCall):
         ''' Get corresponding Function Object'''
         funcObj = node.func_name.getDecl()
         if len(funcObj.arglist) != len(node.par_list):
             '''Number of parameter for function call does not match'''
-            raise InputError("Number of parameter does not match at " + str(node.func_name))
+            raise InputError("Number of parameter does not match at " +
+                             str(node.func_name))
         for x in node.par_list:
             print("DUMMY BEGIN")
             typeChecking(x)
@@ -59,6 +54,7 @@ def typeChecking(node):
         if rightType.isArray():
             rightType = leftType.getBaseType()
 
+        ''' Return type of result from arith expression'''
         if leftType != rightType:
             if leftType == Type.getIntType():
                 '''Add ToReal node on left side'''
@@ -74,7 +70,6 @@ def typeChecking(node):
     elif isinstance(node, AssignStmt):
         leftType = typeChecking(node.lvalue)
         rightType = typeChecking(node.expr)
-
 
         if leftType.isArray():
             leftType = leftType.getBaseType()
@@ -100,22 +95,26 @@ def typeChecking(node):
         accessors = node.getArray()
         for a in accessors:
             if Type.getIntType() != typeChecking(a):
-                raise InputError("Invalid array access in VarDecl: " + str(node.name))
+                raise InputError("Invalid array access in VarDecl: " +
+                                 str(node.name))
     elif isinstance(node, LValue):
         accessors = node.getArrayDeref()
         decl = node.name.getDecl()
         if isinstance(decl, VarDecl):
             if len(node.getArrayDeref()) != len(decl.getArray()):
-                raise InputError("Invalid array access in LValue: " + str(node.name))
+                raise InputError("Invalid array access in LValue: " +
+                                 str(node.name))
 
         for a in accessors:
             if Type.getRealType() == typeChecking(a):
-                raise InputError("Invalid array access in LValue: " + str(node.name))
+                raise InputError("Invalid array access in LValue: " +
+                                 str(node.name))
             else:
                 typeChecking(a)
 
         if isinstance(node.name.getDecl(), Function):
-                raise InputError("The function misses its arguments: " + str(node.name))
+            raise InputError("The function misses its arguments: " +
+                             str(node.name))
 
         return decl.type
 
