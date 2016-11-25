@@ -23,10 +23,8 @@ functionReturnType = None
 
 def typeChecking(node):
     """traverse the AST and add conversion nodes"""
-    '''print("DEBUG: Type of Node:" + str(type(node)))'''
     if isinstance(node, Identifier):
         ident = node.getDecl()
-        '''print("DEBUG: Identifier instance: " + str(type(ident)))'''
         if isinstance(ident, VarDecl):
             return ident.type
         elif isinstance(ident, Function):
@@ -37,13 +35,12 @@ def typeChecking(node):
         ''' Get corresponding Function Object'''
         funcObj = node.func_name.getDecl()
         if len(funcObj.arglist) != len(node.par_list):
-            '''Number of parameter for function call does not match'''
+            '''Number of parameter for function call does not match
+            '''
             raise InputError("Number of parameter does not match at " +
                              str(node.func_name))
         for x in node.par_list:
-            print("DUMMY BEGIN")
             typeChecking(x)
-            print("DUMMY END")
         return funcObj.getType()
     elif isinstance(node, ArithExpr):
         leftType = typeChecking(node.left)
@@ -54,13 +51,16 @@ def typeChecking(node):
         if rightType.isArray():
             rightType = leftType.getBaseType()
 
-        ''' Return type of result from arith expression'''
+        ''' Return type of result from arith expression
+        '''
         if leftType != rightType:
             if leftType == Type.getIntType():
-                '''Add ToReal node on left side'''
+                '''Add ToReal node on left side
+                '''
                 node.left = ToReal(node.left)
             else:
-                '''Add ToReal node on right side'''
+                '''Add ToReal node on right side
+                '''
                 node.right = ToReal(node.right)
             return Type.getRealType()
         if leftType == Type.getIntType():
@@ -78,15 +78,18 @@ def typeChecking(node):
 
         if leftType != rightType:
             if leftType == Type.getIntType():
-                '''Add ToInt cast on right side'''
+                '''Add ToInt cast on right side
+                '''
                 node.expr = ToInt(node.expr)
             else:
-                '''Add ToReal cast on right side'''
+                '''Add ToReal cast on right side
+                '''
                 node.expr = ToReal(node.expr)
     elif isinstance(node, Function):
         global functionReturnType
         functionReturnType = node.getType()
-        ''' check the arguments of the function, e.g. array forbidden '''
+        ''' check the arguments of the function, e.g. array forbidden
+        '''
         for a in node.arglist:
             if len(a.array) != 0:
                 raise InputError("Argument is an array: " + str(node.name))
