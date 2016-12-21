@@ -176,7 +176,7 @@ class Context(object):
         for var in function.virtRegs.values():
             self.addVar(var)
         assert len(self.getAllArgs()) == len(function.params.values())
-        for idx, var in enumerate(reversed(function.params.values())):
+        for idx, var in enumerate(reversed(list(function.params.values()))):
             self.addVar(var)
             self.setVar(var, self.getFuncArg(idx))
         #print("enter", function.name,  self.funcArgs[-1])
