@@ -1,45 +1,21 @@
 #! /bin/bash
 
-ADB=$SDK/platform-tools/adb
 
-if [ -z "$1" ] ; then 
-	echo This Script checks if '$SDK' is set.
-	echo If so, it will run the binary in the android emulator;
-	echo the location of the "adb" tool is determined using '$SDK'.
-	echo If not, it will simply try to run the binary directly.
-	echo Second argument contains stdin of the file to run.
-	echo If '$TIMEOUT' is set, it will abort execution of the binary
-	echo 'after $TIMEOUT seconds (using the GNU timeout tool).'
-	exit 1
+
+if [ "$INTERPRET" = "True" ] ; then
+	IPREFIX="$(dirname $0)/interpreter/mcc"
+else
+	IPREFIX=""
 fi
 
 if [ -z "$TIMEOUT" ] ; then
-	toprefix=''
+	toprefix=""
 else
-	toprefix="timeout $TIMEOUT "
+	toprefix="timeout $TIMEOUT"
 fi
 
-if [ -z "$SDK" ] ; then
-   if [ -z "$2" ] ; then 
-	   exec $toprefix "$1"
-   else
-	   exec $toprefix "$1" < "$2"
-   fi
+if [ -z "$2" ] ; then 
+	exec $toprefix "$IPREFIX" "$1"
 else
-   $ADB push "$1" /data/local/tmp/ &> /dev/null
-   if ! [ -z "$2" ] ; then 
-	   $ADB push "$2" /data/local/tmp/tmp.in &> /dev/null
-   else
-	   $ADB shell rm /data/local/tmp/tmp.in &> /dev/null
-	   $ADB shell touch /data/local/tmp/tmp.in &> /dev/null
-   fi
-   $toprefix $ADB shell  "/data/local/tmp/$1 > /data/local/tmp/tmp.out < /data/local/tmp/tmp.in ; echo \$? > /data/local/tmp/tmp.res"
-   RET=$?
-   $ADB pull  /data/local/tmp/tmp.out /tmp/ &> /dev/null
-   $ADB pull  /data/local/tmp/tmp.res /tmp/ &> /dev/null
-   cat /tmp/tmp.out
-   if ! [ $RET = 0 ] ; then
-	   exit $RET
-   fi
-   exit $(cat /tmp/tmp.res)
+	exec $toprefix "$IPREFIX" "$1" < "$2"
 fi

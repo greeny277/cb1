@@ -1,0 +1,17 @@
+syntax:glob
+*.pyc
+*~
+*.o
+*.run
+*.orig
+*.dot
+*.swp
+*.compstamp
+*.runstamp
+*.ces.tmp
+*.e.*.out.tmp
+*.e.*.res.tmp
+src/parsetab.py
+*.cil
+*.cil.json
+*.ast

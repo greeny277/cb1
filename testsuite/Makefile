@@ -143,7 +143,8 @@ compile: $(call F_COMPSTAMPS, $(call F_SOURCES,$(SUBDIRS_COMPILALE)))
 run: $(call F_RUNSTAMPS, $(call F_SOURCES,$(SUBDIRS_RUNNABLE)))
 
 # same as above
-interpret: $(call F_INTERPSTAMPS, $(call F_SOURCES,$(SUBDIRS_RUNNABLE)))
+TOO_SLOW := ./brainfuck.e ./ttt.e ./arith_simple.e ./matmult.e ./test_simplify_int.e
+interpret: $(call F_INTERPSTAMPS,  $(filter-out $(TOO_SLOW),$(call F_SOURCES,$(SUBDIRS_RUNNABLE))))
 
 # special targets. Up to Exercise 3, we can not yet correctly detect
 # all errors, so we do not compile everything yet.
