@@ -1,5 +1,4 @@
-""" module for generating intermediate code """
-
+""" module for generating intermediate code """ 
 from ir import \
         IRProgram, \
         IRFunction, \
@@ -45,6 +44,8 @@ def irgen(node, irprogram=None, irfunction=None):
 
         for f in node.funcs:  # TODO use addFunc(?)
             irprogram.functions.append(irgen(f, irprogram))
+
+        return irprogram
     elif isinstance(node, Function):
         irfunction = IRFunction(node.name.name, irprogram)
         for par in node.arglist:
