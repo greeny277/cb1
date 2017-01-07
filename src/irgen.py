@@ -82,6 +82,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
 
         for f in node.funcs:  # TODO use addFunc(?)
             irprogram.functions.append(irgen(f, irprogram))
+        return irprogram
     elif isinstance(node, Function):
         irfunction = IRFunction(node.name.name, irprogram)
         for par in node.arglist:
@@ -89,6 +90,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
             irfunction.addParam(irpar)
             par.setIRVar(irpar)
         irgen(node.block, irprogram, irfunction)
+        return irfunction
     elif isinstance(node, VarDecl):
         # Edited: node.name to node.name.name
         irvar = irprogram.getIRVar(node.name.name, node.type)
@@ -170,7 +172,8 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         # get the return type of the func call
         returnType = node.func_name.getDecl().getType()
         destReg = irprogram.getFreeVirtReg(returnType)
-        irfunction.addInstr(CCALL(node.func_name.name, destReg))
+        irfunction.addInstr(CCALL(destReg, node.func_name.name))
+        return destReg
     elif isinstance(node, ReturnStmt):
         irfunction.addInstr(CRET(irgen(node.expr, irprogram, irfunction)))
     elif isinstance(node, CondExpr):
@@ -192,29 +195,29 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
             rightReg = irgen(node.right, irprogram, irfunction)
             if node.op.val == "<=":
                 if negation:
-                    irfunction.addInstr(CBGT(leftReg, rightReg, jump_right))
+                    irfunction.addInstr(CBGT(jump_right, leftReg, rightReg))
                 else:
-                    irfunction.addInstr(CBLE(leftReg, rightReg, jump_dest))
+                    irfunction.addInstr(CBLE(jump_dest, leftReg, rightReg))
             elif node.op.val == "=":
                 if negation:
-                    irfunction.addInstr(CBNE(leftReg, rightReg, jump_right))
+                    irfunction.addInstr(CBNE(jump_right, leftReg, rightReg))
                 else:
-                    irfunction.addInstr(CBEQ(leftReg, rightReg, jump_dest))
+                    irfunction.addInstr(CBEQ(jump_dest, leftReg, rightReg))
             elif node.op.val == "<":
                 if negation:
-                    irfunction.addInstr(CBGE(leftReg, rightReg, jump_right))
+                    irfunction.addInstr(CBGE(jump_right, leftReg, rightReg))
                 else:
-                    irfunction.addInstr(CBLT(leftReg, rightReg, jump_dest))
+                    irfunction.addInstr(CBLT(jump_dest, leftReg, rightReg))
             elif node.op.val == ">":
                 if negation:
-                    irfunction.addInstr(CBLE(leftReg, rightReg, jump_right))
+                    irfunction.addInstr(CBLE(jump_right, leftReg, rightReg))
                 else:
-                    irfunction.addInstr(CBGT(leftReg, rightReg, jump_dest))
+                    irfunction.addInstr(CBGT(jump_dest, leftReg, rightReg))
             elif node.op.val == ">=":
                 if negation:
-                    irfunction.addInstr(CBLT(leftReg, rightReg, jump_right))
+                    irfunction.addInstr(CBLT(jump_right, leftReg, rightReg))
                 else:
-                    irfunction.addInstr(CBGE(leftReg, rightReg, jump_dest))
+                    irfunction.addInstr(CBGE(jump_dest, leftReg, rightReg))
 
     elif isinstance(node, IfStmt):
         l_then = irprogram.genLabel()
