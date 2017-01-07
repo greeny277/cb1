@@ -30,6 +30,8 @@ from ast import \
         Type, \
         AssignStmt, \
         ReturnStmt, \
+        IfStmt, \
+        WhileStmt, \
         LValue, \
         IntLiteral, \
         FloatLiteral, \
@@ -188,6 +190,24 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
                 else:
                     irfunction.addInstr(CBGE(leftReg, rightReg, jump_dest))
 
+    elif isinstance(node, IfStmt):
+        l_then = irprogram.genLabel()
+        l_else = irprogram.genLabel()
+        irgen(node.cond, irprogram, irfunction, l_then, l_else)
+        irfunction.addInstr(l_then)
+        irgen(node.trueblock, irprogram, irfunction)
+        irfunction.addInstr(l_else)
+        irgen(node.falseblock, irprogram, irfunction)
+    elif isinstance(node, WhileStmt):
+        l_cond = irprogram.genLabel()
+        l_then = irprogram.genLabel()
+        l_end = irprogram.genLabel()
+        irfunction.addInstr(l_cond)
+        irgen(node.cond, irprogram, irfunction, l_then, l_end)
+        irfunction.addInstr(l_then)
+        irgen(node.block, irprogram, irfunction)
+        irfunction.addInstr(CBRA(l_cond))
+        irfunction.addInstr(l_end)
     else:
         for x in node.children():
             irgen(x, irprogram, irfunction)
