@@ -67,12 +67,13 @@ def irgen(node, irprogram=None, irfunction=None):
     elif isinstance(node, Literal):
         return ConstValue(node.val, node.type)
     elif isinstance(node, LValue):
-        # is array
         decl = node.name.getDecl()
         derefs = decl.getArrayDeref()
         if len(derefs) != 0:
+            # is array
             offset = 0
             dims = node.name.getDecl().getArray()
+            # compute index for 1-dim array storage
             for i in range(0, len(derefs)):
                     for j in range(i+1, len(dims)):
                         offset += derefs[i]*dims[j]
@@ -92,7 +93,28 @@ def irgen(node, irprogram=None, irfunction=None):
             return irgen(node.name, irprogram, irfunction)
 
     elif isinstance(node, ArithExpr):
-        #TODO
+        # Evaluate leftern subtree
+        leftReg = irgen(node.left, irprogram, irfunction)
+        # Evaluate rightern subtree
+        rightReg = irgen(node.right, irprogram, irfunction)
+
+        if rightReg.type() != leftReg.type():
+            print("ArithExpr: Subexpressions have different type :'(")
+
+        destReg = irprogram.getFreeVirtReg(rightReg.type())
+
+        if node.op.val == "+":
+            irfunction.addInstr(CADD(leftReg, rightReg, destReg))
+        elif node.op.val == "-":
+            irfunction.addInstr(CSUB(leftReg, rightReg, destReg))
+        elif node.op.val == "*":
+            irfunction.addInstr(CMUL(leftReg, rightReg, destReg))
+        elif node.op.val == "/":
+            irfunction.addInstr(CDIV(leftReg, rightReg, destReg))
+        else:
+            print("ArithExpr: Another mysterious error: No valid operand")
+
+        return destReg
 
     elif isinstance(node, FuncCall):
         #TODO Push Params, Call Function, ???, PROFIT!!!
