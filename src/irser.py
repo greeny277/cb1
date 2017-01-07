@@ -1,16 +1,14 @@
 """serialization module"""
 
 import json
-import e_ast
 from ir import ConstValue, Operand, \
     Register, HardwareRegister, VirtualRegister, IRProgram, IRFunction, \
     IRVariable, CASSGN, CI2R, CR2I, CADD, CSUB, CMUL, CDIV,\
     CBRA, CBEQ, CBNE, CBLT, CBGT, CBLE, CBGE, CTarget, CBinary,\
     CSingle, CBranch, CCondBranch, CLOAD, CSTORE, CCALL, CPUSH, \
-    CLABEL, CRET, CUnary
+    CLABEL, CRET, CUnary, CPHI
 
 from common import Type, InternalError
-import irgen
 
 
 class IRJSONEncoder(json.JSONEncoder):
@@ -84,6 +82,9 @@ class IRJSONEncoder(json.JSONEncoder):
                 x['base'] = self.default(o.base)
                 x['offset'] = self.default(o.offset)
                 return x
+            elif isinstance(o, CPHI):
+                x['sources'] = [self.default(k) for k in o.sources]
+                return x
         elif isinstance(o, CSingle):
             return {'classtype': o.__class__.__name__,
                     'op': self.default(o.source)}
@@ -148,8 +149,8 @@ def deserialize(string):
         if not isCreate:
             undefinedLabels.add(x)
         return ll
-
-    def getVar(obj, isGlobal=False):
+        
+    def getVar(obj, isGlobal = False):
         """helper function to generate a register"""
         if isinstance(obj, str):
             return known[obj]
@@ -200,6 +201,9 @@ def deserialize(string):
             return CLOAD(genOperand(v['target']),
                          genOperand(v['base']),
                          genOperand(v['offset']))
+        if t == 'CPHI':
+            return CPHI(genOperand(v['target']),
+                        [genOperand(x) for x in v['sources']])
         if t == 'CSTORE':
             return CSTORE(genOperand(v['base']),
                           genOperand(v['offset']),
@@ -226,8 +230,7 @@ def deserialize(string):
         ff.isPredefined = f.get('isPredefined', False)
         ff.returnType = genType(f['returnType'])
         if len(undefinedLabels) != 0:
-            raise InternalError("use of undefined label(s) "
-                                + str(undefinedLabels))
+            raise InternalError("use of undefined label(s) " + str(undefinedLabels))
         return ff
 
     def genType(t):
@@ -243,12 +246,11 @@ def deserialize(string):
             raise Exception("unknown type: " + t['basetype'])
         if 'dims' in t:
             for dd in t['dims']:
-                x = Type.getArrayType(x, e_ast.IntLiteral(str(dd)))
+                x = Type.getArrayType(x, str(dd))
         return x
 
     o = json.JSONDecoder().decode(string)
     p = IRProgram()
-    irgen.addpredefinedfunctions(p)
     for g in o['globals']:
         p.variables.append(getVar(g, isGlobal=True))
     for g in o['funcs']:

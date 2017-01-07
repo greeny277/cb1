@@ -4,10 +4,27 @@ from common import typecheck
 import common
 
 
+class OperandValue(object):
+    """base class for the value of an operand"""
+    # pylint: disable=too-few-public-methods
+    _operanduidsrc = 0
+
+    @typecheck
+    def __init__(self, _type: common.Type):
+        self.__type = _type
+        self.uid = OperandValue._operanduidsrc
+        OperandValue._operanduidsrc += 1
+
+    @property
+    def type(self):
+        "type of operand"
+        return self.__type
+
+
 class Operand(object):
     """operand for ir instruction"""
-    def __init__(self, value):
-        typecheck(value, OperandValue)
+    @typecheck
+    def __init__(self, value: OperandValue):
         self.__val = value
 
     def __str__(self):
@@ -25,8 +42,8 @@ class Operand(object):
 
     # pylint: disable=missing-docstring
     @val.setter
-    def val(self, val):
-        typecheck(val, OperandValue)
+    @typecheck
+    def val(self, val: OperandValue):
         self.__val = val
         return self.__val
 
@@ -35,23 +52,6 @@ class Operand(object):
             return self.val == other.val and self.type == other.type
         except AttributeError:
             return False
-
-
-class OperandValue(object):
-    """base class for the value of an operand"""
-    # pylint: disable=too-few-public-methods
-    _operanduidsrc = 0
-
-    def __init__(self, _type):
-        self.__type = _type
-        typecheck(_type, common.Type)
-        self.uid = OperandValue._operanduidsrc
-        OperandValue._operanduidsrc += 1
-
-    @property
-    def type(self):
-        "type of operand"
-        return self.__type
 
 
 class ConstValue(OperandValue):
@@ -63,6 +63,9 @@ class ConstValue(OperandValue):
     def __str__(self):
         return str(self.val)
 
+    def __hash__(self):
+        return hash(self.val)
+    
     @property
     def val(self):
         "const value of this operand"
@@ -73,124 +76,6 @@ class ConstValue(OperandValue):
             return self.val == other.val and self.type == other.type
         except AttributeError:
             return False
-
-
-class Register(OperandValue):
-    """class to represent registers in the IR"""
-    def __init__(self, name, _type):
-        super(Register, self).__init__(_type)
-        self.__name = name
-
-    @property
-    def name(self):
-        """this register's name"""
-        return self.__name
-
-    def prettyprint(self, _file):
-        """ prettyprinter for dumping this register to _file"""
-        xstr = "reg " + self.name + " " + self.type.desc()
-        _file.write(xstr + "\n")
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return "Reg:" + self.name
-
-    def __eq__(self, other):
-        try:
-            return self.name == other.name and self.type == other.type
-        except AttributeError:
-            return False
-
-    def __hash__(self):
-        return hash(self.name)
-
-
-class VirtualRegister(Register):
-    """class to represent virtual registers"""
-    # pylint: disable=too-few-public-methods
-    pass
-
-
-class HardwareRegister(Register):
-    """class to represent hardware registers"""
-    # pylint: disable=too-few-public-methods
-    pass
-
-
-class IRProgram(object):
-    """wrapper class for ir of whole program"""
-    def __init__(self):
-        self.__variables = []
-        self.__functions = []
-        self._nextlabelid = 0
-        self._nextvregid = 0
-        self._used_names = set()
-
-    def prettyprint(self, _file):
-        """ prettyprinter for dumping the program to _file"""
-        for var in self.variables:
-            var.prettyprint(_file)
-        for fun in self.functions:
-            fun.prettyprint(_file)
-
-    def consCheck(self):
-        """consistency check method"""
-        names = set()
-        for var in self.variables:
-            assert isinstance(var, IRVariable)
-            assert var.name not in names
-            names.add(var.name)
-        for fun in self.functions:
-            assert isinstance(fun, IRFunction)
-            fun.consCheck(self)
-            assert fun.name not in names
-            names.add(fun.name)
-
-    def genLabel(self):
-        """generate new, unused label"""
-        self._nextlabelid += 1
-        return CLABEL(self._nextlabelid)
-
-
-    def getFreeVirtReg(self, _type):
-        """creates new, globally unique virtual register and returns it"""
-        typecheck(_type, common.Type)
-        while True:
-            name = "%R"+str(self._nextvregid)
-            self._nextvregid += 1
-            if not name in self._used_names:
-                break
-        reg = VirtualRegister(name, _type)
-        self._used_names.add(name)
-        return reg
-
-    def getUnusedName(self, name):
-        ext = ""
-        extid = 0
-        while name + ext in self._used_names:
-            extid += 1
-            ext = '$' + str(extid)
-        self._used_names.add(name+ext)
-        return name+ext
-
-    def getIRVar(self, name, _type, isGlobal=False):
-        """generates new, unused variable with specified type.
-        The name of the new var starts with name, and is globally unique"""
-        name = self.getUnusedName(name)
-        irv = IRVariable(name, _type, isGlobal)
-        return irv
-
-    @property
-    def variables(self):
-        "global variables"
-        return self.__variables
-
-    @property
-    def functions(self):
-        "global functions"
-        return self.__functions
 
 
 class IRVariable(OperandValue):
@@ -227,77 +112,255 @@ class IRVariable(OperandValue):
         return self.__isGlobal
 
 
-# pylint: disable=too-many-instance-attributes
-class IRFunction(object):
-    """ IR Function
+class Register(OperandValue):
+    """class to represent registers in the IR"""
+    def __init__(self, name, _type):
+        super(Register, self).__init__(_type)
+        self.__name = name
 
-    Members:
-    name: Name of this function
-    params: Parameters of this function
-    vars: local variables of this function
-    virtRegs: virtual registers used by this function
-    """
-    def __init__(self, name, irprogram):
-        self.name = irprogram.getUnusedName(name)
-        self.params = OrderedDict()
-        self.vars = OrderedDict()
-        self.virtRegs = OrderedDict()
-        self._firstInstr = None
-        self._lastInstr = None
-        self.isPredefined = False
-        self._nextvregid = 0
+    @property
+    def name(self):
+        """this register's name"""
+        return self.__name
 
     def prettyprint(self, _file):
-        """ prettyprinter for dumping this function to _file"""
-        _file.write("Function " + self.name + "\n")
-        _file.write(" local vars\n")
-        for val in self.vars.values():
-            _file.write("  ")
-            val.prettyprint(_file)
-        _file.write(" params\n")
-        for val in self.params.values():
-            _file.write("  ")
-            val.prettyprint(_file)
-        _file.write(" registers\n")
-        for val in self.virtRegs.values():
-            _file.write("  ")
-            val.prettyprint(_file)
-        _file.write(" code\n")
-        for instr in self.instrs():
-            if isinstance(instr, CLABEL):
-                indent = "  "
-            else:
-                indent = "    "
-            _file.write(indent + str(instr) + "\n")
+        """ prettyprinter for dumping this register to _file"""
+        xstr = "reg " + self.name + " " + self.type.desc()
+        _file.write(xstr + "\n")
 
-    def addInstr(self, instr):
-        """appends instruction to function"""
-        typecheck(instr, ICode)
-        if self._firstInstr is None:
-            self._firstInstr = self._lastInstr = instr
-            instr.function = self
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return "Reg:" + self.name
+
+    def __eq__(self, other):
+        try:
+            return self.name == other.name and self.type == other.type
+        except AttributeError:
+            return False
+
+    def __hash__(self):
+        return hash(self.name)
+
+
+class HardwareRegister(Register):
+    """class to represent hardware registers"""
+    # pylint: disable=too-few-public-methods
+    pass
+
+
+class VirtualRegister(Register):
+    """class to represent virtual registers
+
+    Members:
+    hwreg: the hardware register that backs this virtual register"""
+    def __init__(self, name, _type):
+        super(VirtualRegister, self).__init__(name, _type)
+        self.__variable = None
+        self.__hwreg = None
+
+    @property
+    def variable(self):
+        "IRVariable that backs this virtual register"
+        return self.__variable
+
+    @property
+    def hwreg(self):
+        "Hardware Register that backs this virtual register"
+        return self.__hwreg
+
+    # pylint: disable=missing-docstring
+
+    @variable.setter
+    @typecheck
+    def variable(self, var: IRVariable):
+        assert self.__hwreg is None
+        self.__variable = var
+
+    @hwreg.setter
+    @typecheck
+    def hwreg(self, reg: HardwareRegister):
+        assert self.__variable is None
+        self.__hwreg = reg
+
+
+class IRProgram(object):
+    """wrapper class for ir of whole program"""
+    def __init__(self):
+        self.__variables = []
+        self.__functions = []
+        self._nextlabelid = 0
+        self._nextvregid = 0
+        self._used_names = set()
+ 
+    def prettyprint(self, _file):
+        """ prettyprinter for dumping the program to _file"""
+        for var in self.variables:
+            var.prettyprint(_file)
+        for fun in self.functions:
+            fun.prettyprint(_file)
+
+    def consCheck(self):
+        """consistency check method"""
+        names = set()
+        for var in self.variables:
+            assert isinstance(var, IRVariable)
+            assert var.name not in names
+            names.add(var.name)
+        for fun in self.functions:
+            assert isinstance(fun, IRFunction)
+            fun.consCheck(self)
+            assert fun.name not in names
+            names.add(fun.name)
+
+    def genLabel(self):
+        """generate new, unused label"""
+        self._nextlabelid += 1
+        return CLABEL(self._nextlabelid)
+
+    @property
+    def variables(self):
+        "global variables"
+        return self.__variables
+
+    @property
+    def functions(self):
+        "global functions"
+        return self.__functions
+
+    @typecheck
+    def getFreeVirtReg(self, function, _type: common.Type):
+        """creates new, globally unique virtual register and returns it"""
+        while True:
+            name = "$R"+str(self._nextvregid)
+            self._nextvregid += 1
+            if not name in self._used_names:
+                break
+        reg = VirtualRegister(name, _type)
+        self._used_names.add(name)
+        function.addVirtReg(reg)
+        return reg
+
+    @typecheck
+    def getUnusedName(self, name: str):
+        if '$' in name:
+            nameparts = name.split('$')
+            assert len(nameparts) == 2
+            name = nameparts[0]
+        ext = ""
+        extid = 0
+        while name + ext in self._used_names:
+            extid += 1
+            ext = '$' + str(extid)
+        self._used_names.add(name+ext)
+        return name+ext
+
+    @typecheck
+    def registerUsedName(self, name: str):
+        assert not name in self._used_names, "already have name " + name
+        self._used_names.add(name)
+    
+    def getIRVar(self, name, _type, isGlobal=False):
+        """generates new, unused variable with specified type.
+        The name of the new var starts with name, and is globally unique"""
+        name = self.getUnusedName(name)
+        irv = IRVariable(name, _type, isGlobal)
+        return irv
+
+class ICode(object):
+    """base class for IR instructions"""
+    def __init__(self):
+        self.__next = None
+        self.__prev = None
+        self.__owner = None
+
+    def __str__(self):
+        return self.__class__.__name__
+
+    def insertBefore(self, otherinstr):
+        """inserts otherinstr before this instruction
+        in this instruction's owner"""
+        # pylint: disable=protected-access
+        assert isinstance(otherinstr, ICode)
+        if self.__prev is None:
+            self.__prev = otherinstr
+            otherinstr.__next = self
+            otherinstr.owner = self.owner
+            self.owner._firstInstr = otherinstr
         else:
-            self._lastInstr.insertAfter(instr)
+            otherinstr.__next = self
+            otherinstr.owner = self.owner
+            otherinstr.__prev = self.__prev
+            self.__prev = otherinstr
+            otherinstr.__prev.__next = otherinstr
 
-    def insertInstr(self, instr):
-        """prepends instruction to function"""
-        typecheck(instr, ICode)
-        if self._firstInstr is None:
-            self._firstInstr = self._lastInstr = instr
-            instr.function = self
+    def insertAfter(self, otherinstr):
+        """inserts otherinstr after this instruction
+        in this instruction's owner"""
+        # pylint: disable=protected-access
+        assert isinstance(otherinstr, ICode)
+        if self.__next is None:
+            self.__next = otherinstr
+            otherinstr.__prev = self
+            otherinstr.owner = self.owner
+            self.owner._lastInstr = otherinstr
         else:
-            self._firstInstr.insertBefore(instr)
+            otherinstr.__prev = self
+            otherinstr.owner = self.owner
+            otherinstr.__next = self.__next
+            self.__next = otherinstr
+            otherinstr.__next.__prev = otherinstr
 
-    def addVar(self, var):
-        """adds local variable to function"""
-        typecheck(var, IRVariable)
-        # assert not var.name in self.virtRegs
-        self.vars[var.name] = var
+    def remove(self):
+        """removes this instruction from this instruction's owner"""
+        # pylint: disable=protected-access
+        if self.__next is None and self.__prev is None:
+            self.owner._firstInstr = self.owner._lastInstr = None
+        elif self.__next is None:
+            self.owner._lastInstr = self.__prev
+            self.__prev.__next = None
+        elif self.__prev is None:
+            self.owner._firstInstr = self.__next
+            self.__next.__prev = None
+        else:
+            self.__prev.__next = self.__next
+            self.__next.__prev = self.__prev
+        self.__prev = self.__next = self.owner = None
 
-    def addParam(self, var):
-        """adds parameter to function"""
-        typecheck(var, IRVariable)
-        self.params[var.name] = var
+    @property
+    def prev(self):
+        """the preceding instruction"""
+        return self.__prev
+
+    @property
+    def next(self):
+        """the next instruction"""
+        return self.__next
+
+    @property
+    def owner(self):
+        return self.__owner
+
+    @owner.setter
+    def owner(self, val):
+        self.__owner = val
+    
+    def getOperandsRead(self):
+        """returns a list of operands read in this instruction"""
+        # pylint: disable=no-self-use
+        return []
+
+    def getOperandsWritten(self):
+        """returns a list of operands written in this instruction"""
+        # pylint: disable=no-self-use
+        return []
+
+
+class ICodeList(object):
+    def __init__(self):
+        self._firstInstr = None
+        self._lastInstr = None
 
     def instrsreversed(self):
         """returns a reverse-iterator over the instructions of this function"""
@@ -330,7 +393,7 @@ class IRFunction(object):
         odd = False
         while True:
             assert isinstance(fast, ICode)
-            assert fast.function is self
+            assert fast.owner is self
             if fast.next is None:
                 assert fast is self._lastInstr
                 break
@@ -340,95 +403,110 @@ class IRFunction(object):
                 slow = slow.next
             odd = not odd
             assert slow is not fast
-
-
-class ICode(object):
-    """base class for IR instructions"""
-    def __init__(self):
-        self.__next = None
-        self.__prev = None
-        self.function = None
-
-    def __str__(self):
-        return self.__class__.__name__
-
-    def insertBefore(self, otherinstr):
-        """inserts otherinstr before this instruction
-        in this instruction's function"""
-        # pylint: disable=protected-access
-        if self.__prev is None:
-            self.__prev = otherinstr
-            otherinstr.__next = self
-            otherinstr.function = self.function
-            self.function._firstInstr = otherinstr
+        
+    @typecheck
+    def addInstr(self, instr: ICode):
+        """appends instruction to function"""
+        if self._firstInstr is None:
+            self._firstInstr = self._lastInstr = instr
+            instr.owner = self
         else:
-            otherinstr.__next = self
-            otherinstr.function = self.function
-            otherinstr.__prev = self.__prev
-            self.__prev = otherinstr
-            otherinstr.__prev.__next = otherinstr
+            self._lastInstr.insertAfter(instr)
 
-    def insertAfter(self, otherinstr):
-        """inserts otherinstr after this instruction
-        in this instruction's function"""
-        # pylint: disable=protected-access
-        if self.__next is None:
-            self.__next = otherinstr
-            otherinstr.__prev = self
-            otherinstr.function = self.function
-            self.function._lastInstr = otherinstr
+    @typecheck
+    def insertInstr(self, instr: ICode):
+        """prepends instruction to function"""
+        if self._firstInstr is None:
+            self._firstInstr = self._lastInstr = instr
+            instr.owner = self
         else:
-            otherinstr.__prev = self
-            otherinstr.function = self.function
-            otherinstr.__next = self.__next
-            self.__next = otherinstr
-            otherinstr.__next.__prev = otherinstr
+            self._firstInstr.insertBefore(instr)
 
-    def remove(self):
-        """removes this instruction from this instruction's function"""
-        # pylint: disable=protected-access
-        if self.__next is None and self.__prev is None:
-            self.function._firstInstr = self.function._lastInstr = None
-        elif self.__next is None:
-            self.function._lastInstr = self.__prev
-            self.__prev.__next = None
-        elif self.__prev is None:
-            self.function._firstInstr = self.__next
-            self.__next.__prev = None
-        else:
-            self.__prev.__next = self.__next
-            self.__next.__prev = self.__prev
-        self.__prev = self.__next = self.function = None
-
+    def addAll(self, instructions):
+        for ins in instructions:
+            if ins.owner:
+                ins.remove()
+            self.addInstr(ins)
+            
     @property
-    def prev(self):
-        """the preceding instruction"""
-        return self.__prev
-
+    def first(self):
+        return self._firstInstr
     @property
-    def next(self):
-        """the next instruction"""
-        return self.__next
+    def last(self):
+        return self._lastInstr
+            
+# pylint: disable=too-many-instance-attributes
+class IRFunction(ICodeList):
+    """ IR Function
 
-    def getOperandsRead(self):
-        """returns a list of operands read in this instruction"""
-        # pylint: disable=no-self-use
-        return []
+    Members:
+    name: Name of this function
+    params: Parameters of this function
+    vars: local variables of this function
+    virtRegs: virtual registers used by this function
+    """
+    def __init__(self, name, irprogram):
+        super().__init__()
+        self.name = irprogram.getUnusedName(name)
+        self.params = OrderedDict()
+        self.vars = OrderedDict()
+        self.virtRegs = OrderedDict()
+        self.isPredefined = False
+        self.returnType = common.Type.getIntType()
+        self.cfg = None
+        
+    def prettyprint(self, _file):
+        """ prettyprinter for dumping this function to _file"""
+        _file.write("Function %s returns %s\n" % (self.name, self.returnType))
+        _file.write(" local vars\n")
+        for val in self.vars.values():
+            _file.write("  ")
+            val.prettyprint(_file)
+        _file.write(" params\n")
+        for val in self.params.values():
+            _file.write("  ")
+            val.prettyprint(_file)
+        _file.write(" registers\n")
+        for val in self.virtRegs.values():
+            _file.write("  ")
+            val.prettyprint(_file)
+        _file.write(" code\n")
+        for instr in self.instrs():
+            if isinstance(instr, CLABEL):
+                indent = "  "
+            else:
+                indent = "    "
+            _file.write(indent + str(instr) + "\n")
 
-    def getOperandsWritten(self):
-        """returns a list of operands written in this instruction"""
-        # pylint: disable=no-self-use
-        return []
+    @typecheck
+    def addVar(self, var: IRVariable):
+        """adds local variable to function"""
+        self.vars[var.name] = var
 
+    @typecheck
+    def addVirtReg(self, vr: VirtualRegister):
+        """adds virtual register to function"""
+        self.virtRegs[vr.name] = vr
+
+    @typecheck
+    def addParam(self, var: IRVariable):
+        """adds parameter to function"""
+        self.params[var.name] = var
+
+    def instrs(self):
+        if self.cfg is None:
+            return super().instrs()
+        return self.cfg.instrs()
+        
 
 class CTarget(ICode):
     """base class for IR instructions with one target operand
 
     Members:
     target: target operand of this instruction"""
-    def __init__(self, target):
+    @typecheck
+    def __init__(self, target: OperandValue):
         super(CTarget, self).__init__()
-        typecheck(target, OperandValue)
         self.__target = Operand(target)
 
     def getOperandsWritten(self):
@@ -445,9 +523,9 @@ class CSingle(ICode):
 
     Members:
     source: source operand of this instruction"""
-    def __init__(self, source):
+    @typecheck
+    def __init__(self, source: OperandValue):
         super(CSingle, self).__init__()
-        typecheck(source, OperandValue)
         self.__source = Operand(source)
 
     def __str__(self):
@@ -470,10 +548,9 @@ class CBinary(CTarget):
     Members:
     left: left source operand of this instruction
     right: right source operand of this instruction"""
-    def __init__(self, target, left, right):
+    @typecheck
+    def __init__(self, target: OperandValue, left, right: OperandValue):
         super(CBinary, self).__init__(target)
-        typecheck(left, OperandValue)
-        typecheck(right, OperandValue)
         self.__left = Operand(left)
         self.__right = Operand(right)
 
@@ -510,9 +587,9 @@ class CUnary(CTarget):
 
     Members:
     src: source operand of this instruction"""
-    def __init__(self, target, source):
+    @typecheck
+    def __init__(self, target, source: OperandValue):
         super(CUnary, self).__init__(target)
-        typecheck(source, OperandValue)
         self.__source = Operand(source)
 
     def __str__(self):
@@ -541,9 +618,9 @@ class CLABEL(ICode):
 
 class CBranch(ICode):
     """base class for all jump instructions"""
-    def __init__(self, label):
+    @typecheck
+    def __init__(self, label: CLABEL):
         super(CBranch, self).__init__()
-        typecheck(label, CLABEL)
         self.__label = label
 
     @property
@@ -557,17 +634,16 @@ class CBranch(ICode):
 
     # pylint: disable=missing-docstring
     @label.setter
-    def label(self, label):
-        typecheck(label, CLABEL)
+    @typecheck
+    def label(self, label: CLABEL):
         self.__label = label
 
 
 class CCondBranch(CBranch):
     """base class for conditional jump instructions"""
-    def __init__(self, label, left, right):
+    @typecheck
+    def __init__(self, label, left: OperandValue, right: OperandValue):
         super(CCondBranch, self).__init__(label)
-        typecheck(left, OperandValue)
-        typecheck(right, OperandValue)
         self.__left = Operand(left)
         self.__right = Operand(right)
 
@@ -635,7 +711,8 @@ class CBRA(CBranch):
 class CPOP(CTarget):
     """instruction to save single argument to stack
     only used by the backend, to save/restore caller/callee save registers"""
-    pass
+    def __str__(self):
+        return self.__class__.__name__ + " " + str(self.target)
 
 
 # function call instructions
@@ -655,6 +732,8 @@ class CCALL(CTarget):
     def __init__(self, target, name):
         super(CCALL, self).__init__(target)
         self.__name = name
+        self.__regToSave = []
+        self.__varsToSave = []
 
     def __str__(self):
         return str(self.target) + " = " \
@@ -665,6 +744,25 @@ class CCALL(CTarget):
     def name(self):
         "name of target function"
         return self.__name
+
+    @property
+    def registersToSave(self):
+        return self.__regToSave
+
+    @registersToSave.setter
+    def registersToSave(self, listofregs):
+        assert isinstance(listofregs, list)
+        self.__regToSave = listofregs
+
+    @property
+    def varsToSave(self):
+        return self.__varsToSave
+
+    @varsToSave.setter
+    def varsToSave(self, listofregs):
+        assert isinstance(listofregs, list)
+        self.__varsToSave = listofregs
+        
 
 # arithmetic instructions
 
@@ -706,12 +804,42 @@ class CASSGN(CUnary):
         return str(self.target) + " = " + str(self.source)
 
 
+class CPHI(CTarget):
+    """instruction representing a PHI Node"""
+    # pylint: disable=dangerous-default-value
+    # [] as default argument is dangerous, if you modify it,
+    # because it is shared by all invocations.
+    # here, we copy the contents of sources, and never modify it,
+    # so nothing bad happens.
+    def __init__(self, target, sources=[]):
+        super(CPHI, self).__init__(target)
+        self.__sources = list(Operand(ll) for ll in sources)
+
+    def __str__(self):
+        rv = str(self.target) + " = PHI("
+        sep = ""
+        for ll in self.sources:
+            rv += sep
+            rv += str(ll)
+            sep = ", "
+        rv += ")"
+        return rv
+
+    @property
+    def sources(self):
+        "sources of this phi node"
+        return self.__sources
+
+    def getOperandsRead(self):
+        return self.sources
+
+
 class CLOAD(CTarget):
     """instruction to load value from array"""
-    def __init__(self, target, base, offset):
+    @typecheck
+    def __init__(self, target, base: OperandValue,
+                 offset: OperandValue):
         super(CLOAD, self).__init__(target)
-        typecheck(base, OperandValue)
-        typecheck(offset, OperandValue)
         self.__base = Operand(base)
         self.__offset = Operand(offset)
 
@@ -736,11 +864,10 @@ class CLOAD(CTarget):
 
 class CSTORE(ICode):
     """instruction to store value to array"""
-    def __init__(self, target, offset, value):
+    @typecheck
+    def __init__(self, target: OperandValue, offset: OperandValue,
+                 value: OperandValue):
         super(CSTORE, self).__init__()
-        typecheck(target, OperandValue)
-        typecheck(offset, OperandValue)
-        typecheck(value, OperandValue)
         self.__target = Operand(target)
         self.__offset = Operand(offset)
         self.__value = Operand(value)
