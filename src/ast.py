@@ -93,12 +93,20 @@ class VarDecl(AstNode):
         self.id = _DeclID
         _DeclID = _DeclID + 1
         self.array = []
+        self.irvar = None
 
     def children(self):
         yield self.type
         for x in self.array:
             yield x
         yield self.name
+
+    def getIRVar(self):
+        """Return references IRVar object"""
+        return self.irvar
+
+    def setIRVar(self, irvar_):
+        self.irvar = irvar_
 
     def desc(self):
         return str(self.id)
