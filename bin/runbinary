@@ -1,0 +1,21 @@
+#! /bin/bash
+
+
+
+if [ "$INTERPRET" = "True" ] ; then
+	IPREFIX="$(dirname $0)/interpreter/mcc"
+else
+	IPREFIX=""
+fi
+
+if [ -z "$TIMEOUT" ] ; then
+	toprefix=""
+else
+	toprefix="timeout $TIMEOUT"
+fi
+
+if [ -z "$2" ] ; then 
+	exec $toprefix "$IPREFIX" "$1"
+else
+	exec $toprefix "$IPREFIX" "$1" < "$2"
+fi

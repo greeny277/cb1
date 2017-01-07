@@ -1,0 +1,12 @@
+__pycache__
+.*.swp
+*.o
+*.out
+src/parsetab.py
+*.pyc
+*.pdf
+*.S
+*.dot
+*.AST
+*.CIL
+testsuite
