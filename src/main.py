@@ -11,6 +11,7 @@ import common
 import constFold
 import symbolAST
 import typeCheck
+import irgen
 
 from common import InputError
 
@@ -46,6 +47,8 @@ parser.add_argument('-m', help="choose backend (x86|arm|amd64|jvm|...)", nargs=1
 parser.add_argument('inputfile', help="Input File", metavar="<inputFile>")
 parser.add_argument('--dotify-ast', help="Generate a dot file out of a given source file", action='store_true',
                     default=False)
+parser.add_argument('--dump-cil-to-file-and-exit', help="Dump the generated intermediate code",
+        nargs=1, metavar="<cilFile>")
 
 def main(arguments):
     """main function"""
@@ -69,6 +72,9 @@ def main(arguments):
 
         # file name of AST Dump
         astdumpfile = inputfilebasename + ".AST"
+
+        # file name of specified CIL Dump file
+        cildumpfile_spec = myargs.dump_cil_to_file_and_exit[0]
 
         # file name of CIL Dump
         cildumpfile = inputfilebasename + ".CIL"
@@ -122,14 +128,17 @@ def main(arguments):
             dumpDot.dumpDot(x, ddf)
             ddf.close()
 
+        irprogram = irgen.irgen(x)
 
-
-        # TODO: intermediate code generation
+        if myargs.dump_cil_to_file_and_exit is not None:
+            cdf = open(cildumpfile_spec, "w")
+            irprogram.prettyprint(cdf)
+            cdf.close()
 
         if myargs.dump_cil is not None:
             cdf = open(cildumpfile, "w")
             cdf.write("CIL code dump\n")
-            # TODO: write IR code to file object cdf
+            irprogram.prettyprint(cdf)
             cdf.close()
 
         asmfd = open(asmfile, "w")
