@@ -2,7 +2,17 @@
 from ir import \
         IRProgram, \
         IRFunction, \
-        IRVariable
+        IRVariable, \
+        ConstValue, \
+        CR2I, \
+        CLOAD, \
+        CADD, \
+        CSUB, \
+        CMUL, \
+        CDIV, \
+        CPUSH, \
+        CCALL, \
+        CRET
 
 from ast import \
         Program, \
@@ -16,11 +26,11 @@ from ast import \
         LValue, \
         IntLiteral, \
         FloatLiteral, \
+        Literal, \
         ArithExpr, \
         FuncCall, \
         ToReal, \
         ToInt
-from symbolTable import getSymbolTable
 
 # TODO check default value for parameter
 
@@ -118,8 +128,15 @@ def irgen(node, irprogram=None, irfunction=None):
         return destReg
 
     elif isinstance(node, FuncCall):
-        #TODO Push Params, Call Function, ???, PROFIT!!!
+        for p in reversed(node.par_list):
+            irfunction.addInstr(CPUSH(p))
 
+        # get the return type of the func call
+        returnType = node.func_name.getDecl().getType()
+        destReg = irprogram.getFreeVirtualReg(returnType)
+        irfunction.addInstr(CCALL(node.func_name.name, destReg))
+    elif isinstance(node, ReturnStmt):
+        irfunction.addInstr(CRET(irgen(node.expr, irprogram, irfunction).val()))
     else:
         for x in node.children():
             irgen(x, irprogram, irfunction)
