@@ -73,8 +73,6 @@ def main(arguments):
         # file name of AST Dump
         astdumpfile = inputfilebasename + ".AST"
 
-        # file name of specified CIL Dump file
-        cildumpfile_spec = myargs.dump_cil_to_file_and_exit[0]
 
         # file name of CIL Dump
         cildumpfile = inputfilebasename + ".CIL"
@@ -131,6 +129,9 @@ def main(arguments):
         irprogram = irgen.irgen(x)
 
         if myargs.dump_cil_to_file_and_exit is not None:
+            # file name of specified CIL Dump file
+            cildumpfile_spec = myargs.dump_cil_to_file_and_exit[0]
+
             cdf = open(cildumpfile_spec, "w")
             irprogram.prettyprint(cdf)
             cdf.close()

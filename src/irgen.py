@@ -58,10 +58,12 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
     elif isinstance(node, Function):
         irfunction = IRFunction(node.name.name, irprogram)
         for par in node.arglist:
-            irfunction.addParam(irgen(par, irprogram, irfunction))
+            irpar = irprogram.getIRVar(par.name.name, par.type)
+            irfunction.addParam(irpar)
         irgen(node.block, irprogram, irfunction)
     elif isinstance(node, VarDecl):
-        irvar = irprogram.getIRVar(node.name, node.type)
+        # Edited: node.name to node.name.name
+        irvar = irprogram.getIRVar(node.name.name, node.type)
         irfunction.addVar(irvar)
     elif isinstance(node, Block):
         for x in node.children():
@@ -72,7 +74,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         elif node.name in irfunction.params:
             return irfunction.params[node.name]
         else:
-            print("This should never happen o.0")
+            print("ERROR Identifier: Cant find IRVariable object to identifier")
     elif isinstance(node, ToInt):
         tmp = irgen(node.successor, irprogram, irfunction)
         virtReg = irprogram.getFreeVirtReg(Type.getIntType())
@@ -89,7 +91,12 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         return ConstValue(node.val, node.type)
     elif isinstance(node, LValue):
         decl = node.name.getDecl()
-        derefs = decl.getArrayDeref()
+        derefs = None
+        if isinstance(decl, Identifier):
+            derefs = decl.getArrayDeref()
+        else:
+            derefs = decl.array
+
         if len(derefs) != 0:
             # is array
             offset = 0
@@ -107,7 +114,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
             elif node.name.name in irfunction.params:
                 base = irfunction.params[node.name.name]
             else:
-                print("This should never happen o.0")
+                print("ERROR LValue: Cant find IRVariable object to identifier")
             irfunction.addInstr(CLOAD(virtReg, base, offset))
             return virtReg
         else:
@@ -146,7 +153,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         destReg = irprogram.getFreeVirtualReg(returnType)
         irfunction.addInstr(CCALL(node.func_name.name, destReg))
     elif isinstance(node, ReturnStmt):
-        irfunction.addInstr(CRET(irgen(node.expr, irprogram, irfunction).val()))
+        irfunction.addInstr(CRET(irgen(node.expr, irprogram, irfunction)))
     elif isinstance(node, CondExpr):
         if node.op.val == "||":
             l_right_cond = irprogram.genLabel()
