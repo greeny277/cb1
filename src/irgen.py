@@ -235,10 +235,9 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         derefs = decl.array
         if len(derefs) != 0:
             # is array
-            dest = irprogram.getFreeVirtReg(decl.type.getBaseType())
             base = getBase(node.lvalue, irfunction)
             offset = getOffset(node.lvalue)
-            irfunction.addInstr(CSTORE(dest, base, offset))
+            irfunction.addInstr(CSTORE(src, base, offset))
         else:
             dest = irgen(node.lvalue, irprogram, irfunction)
             irfunction.addInstr(CASSGN(src, dest))
