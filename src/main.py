@@ -128,22 +128,22 @@ def main(arguments):
             ddf.close()
 
         irprogram = irgen.irgen(x)
-        print("Type irprogram: " + str(type(irprogram)))
 
         if myargs.dump_cil_to_file_and_exit is not None:
             # file name of specified CIL Dump file
             cildumpfile_spec = myargs.dump_cil_to_file_and_exit[0]
 
             cdf = open(cildumpfile_spec, "w")
-            
             cdf.write(irser.serialize(irprogram))
             cdf.close()
 
         if myargs.dump_cil is not None:
             cdf = open(cildumpfile, "w")
             cdf.write("CIL code dump\n")
-            irprogram.prettyprint(cdf)
+            cdf.write(irser.serialize(irprogram))
             cdf.close()
+
+        irprogram.prettyprint(sys.stdout)
 
         asmfd = open(asmfile, "w")
         asmfd.write("; python e compiler assembler\n")

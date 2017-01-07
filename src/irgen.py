@@ -94,27 +94,25 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
     elif isinstance(node, VarDecl):
         # Edited: node.name to node.name.name
         irvar = irprogram.getIRVar(node.name.name, node.type)
-        print("Add IRVariable: " + node.name.name)
         node.setIRVar(irvar)
         irfunction.addVar(irvar)
     elif isinstance(node, Block):
         for x in node.children():
             irgen(x, irprogram, irfunction)
     elif isinstance(node, Identifier):
-        print("Search IRVariable: " + node.name)
         if node.decl.getIRVar() is not None:
             return node.decl.getIRVar()
         else:
             print("ERROR Identifier: Cant find IRVariable object to identifier")
     elif isinstance(node, ToInt):
         tmp = irgen(node.successor, irprogram, irfunction)
-        virtReg = irprogram.getFreeVirtReg(Type.getIntType())
+        virtReg = irprogram.getFreeVirtReg(irfunction, Type.getIntType())
         irfunction.addInstr(CR2I(virtReg, tmp))
         irfunction.virtRegs[virtReg.name] = virtReg
         return virtReg
     elif isinstance(node, ToReal):
         tmp = irgen(node.successor, irprogram, irfunction)
-        virtReg = irprogram.getFreeVirtReg(Type.getRealType())
+        virtReg = irprogram.getFreeVirtReg(irfunction, Type.getRealType())
         irfunction.addInstr(CR2I(virtReg, tmp))
         irfunction.virtRegs[virtReg.name] = virtReg
         return virtReg
@@ -130,7 +128,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
 
         if len(derefs) != 0:
             # is array
-            virtReg = irprogram.getFreeVirtReg(decl.type.getBaseType())
+            virtReg = irprogram.getFreeVirtReg(irfunction, decl.type.getBaseType())
             base = getBase(node, irfunction)
             offset = getOffset(node)
             irfunction.addInstr(CLOAD(virtReg, base, offset))
@@ -144,12 +142,10 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         # Evaluate rightern subtree
         rightReg = irgen(node.right, irprogram, irfunction)
 
-        print("Type leftReg: " + str(type(leftReg)))
-        print("Type rightReg: " + str(type(rightReg)))
         if rightReg.type != leftReg.type:
             print("ArithExpr: Subexpressions have different type :'(")
 
-        destReg = irprogram.getFreeVirtReg(rightReg.type)
+        destReg = irprogram.getFreeVirtReg(irfunction, rightReg.type)
 
         if node.op.val == "+":
             irfunction.addInstr(CADD(leftReg, rightReg, destReg))
@@ -171,7 +167,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
 
         # get the return type of the func call
         returnType = node.func_name.getDecl().getType()
-        destReg = irprogram.getFreeVirtReg(returnType)
+        destReg = irprogram.getFreeVirtReg(irfunction, returnType)
         irfunction.addInstr(CCALL(destReg, node.func_name.name))
         return destReg
     elif isinstance(node, ReturnStmt):
@@ -203,6 +199,11 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
                     irfunction.addInstr(CBNE(jump_right, leftReg, rightReg))
                 else:
                     irfunction.addInstr(CBEQ(jump_dest, leftReg, rightReg))
+            elif node.op.val == "!=":
+                if negation:
+                    irfunction.addInstr(CBEQ(jump_right, leftReg, rightReg))
+                else:
+                    irfunction.addInstr(CBNE(jump_dest, leftReg, rightReg))
             elif node.op.val == "<":
                 if negation:
                     irfunction.addInstr(CBGE(jump_right, leftReg, rightReg))
