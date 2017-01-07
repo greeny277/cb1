@@ -13,7 +13,8 @@ from ir import \
         CDIV, \
         CPUSH, \
         CCALL, \
-        CRET
+        CRET, \
+        CASSGN
 
 from ast import \
         Program, \
@@ -135,7 +136,13 @@ def irgen(node, irprogram=None, irfunction=None):
         destReg = irprogram.getFreeVirtualReg(returnType)
         irfunction.addInstr(CCALL(node.func_name.name, destReg))
     elif isinstance(node, ReturnStmt):
-        irfunction.addInstr(CRET(irgen(node.expr, irprogram, irfunction).val()))
+        irfunction.addInstr(CRET(irgen(node.expr, irprogram, irfunction)))
+    elif isinstance(node, AssignStmt):
+        # get the left side of an assigment
+        src = irgen(node.lvalue, irprogram, irfunction)
+        dest = irgen(node.expr, irprogram, irfunction)
+        irfunction.addInstr(CASSGN(src, dest))
+
     else:
         for x in node.children():
             irgen(x, irprogram, irfunction)
