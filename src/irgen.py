@@ -11,6 +11,13 @@ from ir import \
         CMUL, \
         CDIV, \
         CPUSH, \
+        CBRA, \
+        CBEQ, \
+        CBNE, \
+        CBGT, \
+        CBGE, \
+        CBLT, \
+        CBLE, \
         CCALL, \
         CRET
 
@@ -28,6 +35,7 @@ from ast import \
         FloatLiteral, \
         Literal, \
         ArithExpr, \
+        CondExpr, \
         FuncCall, \
         ToReal, \
         ToInt
@@ -35,7 +43,7 @@ from ast import \
 # TODO check default value for parameter
 
 
-def irgen(node, irprogram=None, irfunction=None):
+def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None, negation=False):
     if isinstance(node, Program):
         irprogram = IRProgram()
         for v in node.vars:  # TODO use addGlobal(?)
@@ -137,6 +145,49 @@ def irgen(node, irprogram=None, irfunction=None):
         irfunction.addInstr(CCALL(node.func_name.name, destReg))
     elif isinstance(node, ReturnStmt):
         irfunction.addInstr(CRET(irgen(node.expr, irprogram, irfunction).val()))
+    elif isinstance(node, CondExpr):
+        if node.op.val == "||":
+            l_right_cond = irprogram.genLabel()
+            irgen(node.left, irprogram, irfunction, jump_dest, l_right_cond)
+            irfunction.addInstr(l_right_cond)
+            irgen(node.right, irprogram, irfunction, jump_dest, jump_right)
+            irfunction.addInstr(CBRA(jump_right))
+        elif node.op.val == "&&":
+            l_right_cond = irprogram.genLabel()
+            irgen(node.left, irprogram, irfunction, jump_dest, l_right_cond, True)
+            irfunction.addInstr(l_right_cond)
+            irgen(node.right, irprogram, irfunction, jump_dest, jump_right)
+            irfunction.addInstr(CBRA(jump_right))
+        # Evaluate rightern subtree
+        else:
+            leftReg = irgen(node.left, irprogram, irfunction)
+            rightReg = irgen(node.right, irprogram, irfunction)
+            if node.op.val == "<=":
+                if negation:
+                    irfunction.addInstr(CBGT(leftReg, rightReg, jump_right))
+                else:
+                    irfunction.addInstr(CBLE(leftReg, rightReg, jump_dest))
+            elif node.op.val == "=":
+                if negation:
+                    irfunction.addInstr(CBNE(leftReg, rightReg, jump_right))
+                else:
+                    irfunction.addInstr(CBEQ(leftReg, rightReg, jump_dest))
+            elif node.op.val == "<":
+                if negation:
+                    irfunction.addInstr(CBGE(leftReg, rightReg, jump_right))
+                else:
+                    irfunction.addInstr(CBLT(leftReg, rightReg, jump_dest))
+            elif node.op.val == ">":
+                if negation:
+                    irfunction.addInstr(CBLE(leftReg, rightReg, jump_right))
+                else:
+                    irfunction.addInstr(CBGT(leftReg, rightReg, jump_dest))
+            elif node.op.val == ">=":
+                if negation:
+                    irfunction.addInstr(CBLT(leftReg, rightReg, jump_right))
+                else:
+                    irfunction.addInstr(CBGE(leftReg, rightReg, jump_dest))
+
     else:
         for x in node.children():
             irgen(x, irprogram, irfunction)
