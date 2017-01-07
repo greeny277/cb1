@@ -61,7 +61,7 @@ def getBase(node, irfunction):
 
 def getOffset(node):
     decl = node.name.getDecl()
-    derefs = decl.getArrayDeref()
+    derefs = decl.array
     offset = 0
     dims = node.name.getDecl().getArray()
     # compute index for 1-dim array storage
@@ -232,7 +232,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         # get the left side of an assigment
         src = irgen(node.expr, irprogram, irfunction)
         decl = node.lvalue.name.getDecl()
-        derefs = decl.getArrayDeref()
+        derefs = decl.array
         if len(derefs) != 0:
             # is array
             dest = irprogram.getFreeVirtReg(decl.type.getBaseType())
