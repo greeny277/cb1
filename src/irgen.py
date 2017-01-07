@@ -1,4 +1,5 @@
-""" module for generating intermediate code """ 
+""" module for generating intermediate code """
+
 from ir import \
         IRProgram, \
         IRFunction, \
@@ -19,7 +20,9 @@ from ir import \
         CBLT, \
         CBLE, \
         CCALL, \
-        CRET
+        CRET, \
+        CASSGN, \
+        CSTORE
 
 from ast import \
         Program, \
@@ -45,6 +48,31 @@ from ast import \
 # TODO check default value for parameter
 
 
+def getBase(node, irfunction):
+    base = None
+    if node.name.name in irfunction.vars:
+        base = irfunction.vars[node.name.name]
+    elif node.name.name in irfunction.params:
+        base = irfunction.params[node.name.name]
+    else:
+        print("ERROR LValue: Cant find IRVariable object to identifier")
+    return base
+
+
+def getOffset(node):
+    decl = node.name.getDecl()
+    derefs = decl.getArrayDeref()
+    offset = 0
+    dims = node.name.getDecl().getArray()
+    # compute index for 1-dim array storage
+    for i in range(0, len(derefs)):
+            for j in range(i+1, len(dims)):
+                offset += derefs[i]*dims[j]
+
+    offset += derefs[len(derefs)-1]
+    return offset
+
+
 def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None, negation=False):
     if isinstance(node, Program):
         irprogram = IRProgram()
@@ -53,8 +81,6 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
 
         for f in node.funcs:  # TODO use addFunc(?)
             irprogram.functions.append(irgen(f, irprogram))
-
-        return irprogram
     elif isinstance(node, Function):
         irfunction = IRFunction(node.name.name, irprogram)
         for par in node.arglist:
@@ -99,22 +125,9 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
 
         if len(derefs) != 0:
             # is array
-            offset = 0
-            dims = node.name.getDecl().getArray()
-            # compute index for 1-dim array storage
-            for i in range(0, len(derefs)):
-                    for j in range(i+1, len(dims)):
-                        offset += derefs[i]*dims[j]
-
-            offset += derefs[len(derefs)-1]
             virtReg = irprogram.getFreeVirtReg(decl.type.getBaseType())
-            base = None
-            if node.name.name in irfunction.vars:
-                base = irfunction.vars[node.name.name]
-            elif node.name.name in irfunction.params:
-                base = irfunction.params[node.name.name]
-            else:
-                print("ERROR LValue: Cant find IRVariable object to identifier")
+            base = getBase(node, irfunction)
+            offset = getOffset(node)
             irfunction.addInstr(CLOAD(virtReg, base, offset))
             return virtReg
         else:
@@ -215,6 +228,20 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         irgen(node.block, irprogram, irfunction)
         irfunction.addInstr(CBRA(l_cond))
         irfunction.addInstr(l_end)
+    elif isinstance(node, AssignStmt):
+        # get the left side of an assigment
+        src = irgen(node.expr, irprogram, irfunction)
+        decl = node.lvalue.name.getDecl()
+        derefs = decl.getArrayDeref()
+        if len(derefs) != 0:
+            # is array
+            dest = irprogram.getFreeVirtReg(decl.type.getBaseType())
+            base = getBase(node.lvalue, irfunction)
+            offset = getOffset(node.lvalue)
+            irfunction.addInstr(CSTORE(dest, base, offset))
+        else:
+            dest = irgen(node.lvalue, irprogram, irfunction)
+            irfunction.addInstr(CASSGN(src, dest))
     else:
         for x in node.children():
             irgen(x, irprogram, irfunction)
