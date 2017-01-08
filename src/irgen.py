@@ -49,12 +49,13 @@ from ast import \
 # TODO check default value for parameter
 
 
-def getBase(node, irfunction):
+# Parameters:
+#   node: LValue
+def getBase(node, irprogram, irfunction):
     base = None
-    if node.name.name in irfunction.vars:
-        base = irfunction.vars[node.name.name]
-    elif node.name.name in irfunction.params:
-        base = irfunction.params[node.name.name]
+    irvar = node.name.decl.getIRVar()
+    if irvar is not None:
+        base = irvar
     else:
         print("ERROR LValue: Cant find IRVariable object to identifier")
     return base
@@ -78,8 +79,10 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
     if isinstance(node, Program):
         irprogram = IRProgram()
         for v in node.vars:  # TODO use addGlobal(?)
-            irprogram.variables.append(irgen(v))
-
+            # Create IRVariable for globale variables
+            irvar = irprogram.getIRVar(v.name.name, v.type)
+            irprogram.variables.append(irvar)
+            v.setIRVar(irvar)
         for f in node.funcs:  # TODO use addFunc(?)
             irprogram.functions.append(irgen(f, irprogram))
         return irprogram
@@ -129,7 +132,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         if len(derefs) != 0:
             # is array
             virtReg = irprogram.getFreeVirtReg(irfunction, decl.type.getBaseType())
-            base = getBase(node, irfunction)
+            base = getBase(node, irprogram, irfunction)
             offset = getOffset(node)
             irfunction.addInstr(CLOAD(virtReg, base, offset))
             return virtReg
@@ -245,7 +248,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         derefs = decl.array
         if len(derefs) != 0:
             # is array
-            base = getBase(node.lvalue, irfunction)
+            base = getBase(node.lvalue, irprogram, irfunction)
             offset = getOffset(node.lvalue)
             irfunction.addInstr(CSTORE(src, base, offset))
         else:
