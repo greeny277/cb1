@@ -251,7 +251,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
             # is array
             base = getBase(node.lvalue, irprogram, irfunction)
             offset = getOffset(node.lvalue)
-            irfunction.addInstr(CSTORE(src, base, offset))
+            irfunction.addInstr(CSTORE(base, offset, src))
         else:
             dest = irgen(node.lvalue, irprogram, irfunction)
             irfunction.addInstr(CASSGN(dest, src))
