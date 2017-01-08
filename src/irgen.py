@@ -69,10 +69,10 @@ def getOffset(node):
     # compute index for 1-dim array storage
     for i in range(0, len(derefs)):
             for j in range(i+1, len(dims)):
-                offset += derefs[i]*dims[j]
+                offset += int(derefs[i].val)*int(dims[j].val)
 
-    offset += derefs[len(derefs)-1]
-    return offset
+    offset += int(derefs[len(derefs)-1].val)
+    return ConstValue(offset, Type.getIntType())
 
 
 def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None, negation=False):
