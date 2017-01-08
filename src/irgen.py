@@ -159,13 +159,13 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         destReg = irprogram.getFreeVirtReg(irfunction, rightReg.type)
 
         if node.op.val == "+":
-            irfunction.addInstr(CADD(leftReg, rightReg, destReg))
+            irfunction.addInstr(CADD(destReg, leftReg, rightReg))
         elif node.op.val == "-":
-            irfunction.addInstr(CSUB(leftReg, rightReg, destReg))
+            irfunction.addInstr(CSUB(destReg, leftReg, rightReg))
         elif node.op.val == "*":
-            irfunction.addInstr(CMUL(leftReg, rightReg, destReg))
+            irfunction.addInstr(CMUL(destReg, leftReg, rightReg))
         elif node.op.val == "/":
-            irfunction.addInstr(CDIV(leftReg, rightReg, destReg))
+            irfunction.addInstr(CDIV(destReg, leftReg, rightReg))
         else:
             print("ArithExpr: Another mysterious error: No valid operand")
 
