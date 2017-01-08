@@ -1,6 +1,7 @@
 """ module for generating intermediate code """
 
 import json
+import ast
 from ir import \
         IRProgram, \
         IRFunction, \
@@ -62,18 +63,19 @@ def getBase(node, irprogram, irfunction):
     return base
 
 
-def getOffset(node):
-    decl = node.name.getDecl()
-    derefs = decl.array
+def getOffset(node, irprogram, irfunction):
+    derefs = node.getArrayDeref()
     offset = 0
     dims = node.name.getDecl().getArray()
+    offset = ArithExpr(IntLiteral(0), ast.Operator("+"), IntLiteral(0))
     # compute index for 1-dim array storage
     for i in range(0, len(derefs)):
             for j in range(i+1, len(dims)):
-                offset += int(derefs[i].val)*int(dims[j].val)
+                a = ArithExpr(derefs[i], ast.Operator("*"), dims[j])
+                offset = ArithExpr(offset, ast.Operator("+"), a)
 
-    offset += int(derefs[len(derefs)-1].val)
-    return ConstValue(offset, Type.getIntType())
+    offset = ArithExpr(offset, ast.Operator("+"), derefs[(len(derefs)-1)])
+    return irgen(offset, irprogram, irfunction)
 
 
 def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None, negation=False):
@@ -141,7 +143,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
             # is array
             virtReg = irprogram.getFreeVirtReg(irfunction, decl.type.getBaseType())
             base = getBase(node, irprogram, irfunction)
-            offset = getOffset(node)
+            offset = getOffset(node, irprogram, irfunction)
             irfunction.addInstr(CLOAD(virtReg, base, offset))
             return virtReg
         else:
@@ -257,7 +259,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         if len(derefs) != 0:
             # is array
             base = getBase(node.lvalue, irprogram, irfunction)
-            offset = getOffset(node.lvalue)
+            offset = getOffset(node.lvalue, irprogram, irfunction)
             irfunction.addInstr(CSTORE(base, offset, src))
         else:
             dest = irgen(node.lvalue, irprogram, irfunction)
