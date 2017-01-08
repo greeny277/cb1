@@ -85,7 +85,12 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
             # Create IRVariable for globale variables
             irvar = None
             if len(v.getArray()) != 0:
-                irvar = irprogram.getIRVar(v.name.name, v.type.getArrayType((v.getArray()[0])))
+                # create array-type
+                dims = v.getArray()
+                arr_type = v.type.getBaseType()
+                for dim in dims:
+                    arr_type.getArrayType(dim)
+                irvar = irprogram.getIRVar(v.name.name, arr_type)
             else:
                 irvar = irprogram.getIRVar(v.name.name, v.type)
             irprogram.variables.append(irvar)
@@ -104,7 +109,12 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
     elif isinstance(node, VarDecl):
         # Edited: node.name to node.name.name
         if len(node.getArray()) != 0:
-            irvar = irprogram.getIRVar(node.name.name, node.type.getArrayType((node.getArray()[0])))
+             # create array-type
+             dims = node.getArray()
+             arr_type = node.type.getBaseType()
+             for dim in dims:
+                 arr_type.getArrayType(dim)
+             irvar = irprogram.getIRVar(node.name.name, arr_type)
         else:
              irvar = irprogram.getIRVar(node.name.name, node.type)
         node.setIRVar(irvar)
@@ -161,13 +171,13 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         destReg = irprogram.getFreeVirtReg(irfunction, rightReg.type)
 
         if node.op.val == "+":
-            irfunction.addInstr(CADD(leftReg, rightReg, destReg))
+            irfunction.addInstr(CADD(destReg, leftReg, rightReg))
         elif node.op.val == "-":
-            irfunction.addInstr(CSUB(leftReg, rightReg, destReg))
+            irfunction.addInstr(CSUB(destReg, leftReg, rightReg))
         elif node.op.val == "*":
-            irfunction.addInstr(CMUL(leftReg, rightReg, destReg))
+            irfunction.addInstr(CMUL(destReg, leftReg, rightReg))
         elif node.op.val == "/":
-            irfunction.addInstr(CDIV(leftReg, rightReg, destReg))
+            irfunction.addInstr(CDIV(destReg, leftReg, rightReg))
         else:
             print("ArithExpr: Another mysterious error: No valid operand")
 
