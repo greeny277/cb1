@@ -255,6 +255,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         l_end = irprogram.genLabel()
         irfunction.addInstr(l_cond)
         irgen(node.cond, irprogram, irfunction, l_then, l_end)
+        irfunction.addInstr(CBRA(l_end))
         irfunction.addInstr(l_then)
         irgen(node.block, irprogram, irfunction)
         irfunction.addInstr(CBRA(l_cond))
