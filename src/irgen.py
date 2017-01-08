@@ -87,7 +87,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
                 dims = v.getArray()
                 arr_type = v.type.getBaseType()
                 for dim in dims:
-                    arr_type.getArrayType(dim)
+                    arr_type = arr_type.getArrayType(dim)
                 irvar = irprogram.getIRVar(v.name.name, arr_type)
             else:
                 irvar = irprogram.getIRVar(v.name.name, v.type)
@@ -111,7 +111,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
              dims = node.getArray()
              arr_type = node.type.getBaseType()
              for dim in dims:
-                 arr_type.getArrayType(dim)
+                 arr_type = arr_type.getArrayType(dim)
              irvar = irprogram.getIRVar(node.name.name, arr_type)
         else:
              irvar = irprogram.getIRVar(node.name.name, node.type)
