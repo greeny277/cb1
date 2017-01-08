@@ -81,7 +81,11 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         irprogram = IRProgram()
         for v in node.vars:  # TODO use addGlobal(?)
             # Create IRVariable for globale variables
-            irvar = irprogram.getIRVar(v.name.name, v.type)
+            irvar = None
+            if len(v.getArray()) != 0:
+                irvar = irprogram.getIRVar(v.name.name, v.type.getArrayType((v.getArray()[0])))
+            else:
+                irvar = irprogram.getIRVar(v.name.name, v.type)
             irprogram.variables.append(irvar)
             v.setIRVar(irvar)
         for f in node.funcs:  # TODO use addFunc(?)
@@ -97,7 +101,10 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         return irfunction
     elif isinstance(node, VarDecl):
         # Edited: node.name to node.name.name
-        irvar = irprogram.getIRVar(node.name.name, node.type)
+        if len(node.getArray()) != 0:
+            irvar = irprogram.getIRVar(node.name.name, node.type.getArrayType((node.getArray()[0])))
+        else:
+             irvar = irprogram.getIRVar(node.name.name, node.type)
         node.setIRVar(irvar)
         irfunction.addVar(irvar)
     elif isinstance(node, Block):

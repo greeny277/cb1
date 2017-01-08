@@ -83,8 +83,8 @@ class Type(object):
                 if isinstance(ex, str):
                     self._sdl.append(int(ex))
                 else:
-                    import e_ast
-                    if not isinstance(ex, e_ast.IntLiteral):
+                    import ast
+                    if not isinstance(ex, ast.IntLiteral):
                         raise InternalError("need int literal")
                     self._sdl.append(int(ex.val))
         return self._sdl
