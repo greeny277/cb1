@@ -7,6 +7,7 @@ from ir import \
         IRVariable, \
         ConstValue, \
         CR2I, \
+        CI2R, \
         CLOAD, \
         CADD, \
         CSUB, \
@@ -116,7 +117,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
     elif isinstance(node, ToReal):
         tmp = irgen(node.successor, irprogram, irfunction)
         virtReg = irprogram.getFreeVirtReg(irfunction, Type.getRealType())
-        irfunction.addInstr(CR2I(virtReg, tmp))
+        irfunction.addInstr(CI2R(virtReg, tmp))
         irfunction.virtRegs[virtReg.name] = virtReg
         return virtReg
     elif isinstance(node, Literal):
@@ -253,7 +254,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
             irfunction.addInstr(CSTORE(src, base, offset))
         else:
             dest = irgen(node.lvalue, irprogram, irfunction)
-            irfunction.addInstr(CASSGN(src, dest))
+            irfunction.addInstr(CASSGN(dest, src))
     else:
         for x in node.children():
             irgen(x, irprogram, irfunction)
