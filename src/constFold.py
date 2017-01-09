@@ -19,6 +19,9 @@ from ast import \
     FuncCall, \
     CondExpr
 
+import numpy as np
+
+and64 = 0xffffffffffffffff
 
 def foldingAST(node):
     if isinstance(node, IntLiteral) \
@@ -29,22 +32,22 @@ def foldingAST(node):
         r = foldingAST(node.right)
         if isinstance(l, IntLiteral) and isinstance(r, IntLiteral):
             if node.op.val == "+":
-                return IntLiteral(str(int(float(l.val)) + int(float(r.val))))
+                return IntLiteral(str(np.int64(int(l.val.split('.')[0])) + np.int64(int(r.val.split('.')[0]))))
             elif node.op.val == "*":
-                return IntLiteral(str(int(float(l.val)) * int(float(r.val))))
+                return IntLiteral(str(np.int64(int(l.val.split('.')[0])) * np.int64(int(r.val.split('.')[0]))))
             elif node.op.val == "-":
-                return IntLiteral(str(int(float(l.val)) - int(float(r.val))))
+                return IntLiteral(str(np.int64(int(l.val.split('.')[0])) - np.int64(int(r.val.split('.')[0]))))
             elif node.op.val == "/":
-                return IntLiteral(str(int(int(float(l.val)) / int(float(r.val)))))
+                return IntLiteral(str(np.int64(int(l.val.split('.')[0])) / np.int64(int(r.val.split('.')[0]))))
         if isinstance(l, FloatLiteral) and isinstance(r, FloatLiteral):
             if node.op.val == "+":
-                return FloatLiteral(str(float(l.val) + float(r.val)))
+                return FloatLiteral(str((np.float64(float(l.val)) + np.float64(float(r.val)))))
             elif node.op.val == "*":
-                return FloatLiteral(str(float(l.val) * float(r.val)))
+                return FloatLiteral(str((np.float64(float(l.val)) * np.float64(float(r.val)))))
             elif node.op.val == "-":
-                return FloatLiteral(str(float(l.val) - float(r.val)))
+                return FloatLiteral(str((np.float64(float(l.val)) - np.float64(float(r.val)))))
             elif node.op.val == "/":
-                return FloatLiteral(str(float(l.val) / float(r.val)))
+                return FloatLiteral(str((np.float64(float(l.val)) / np.float64(float(r.val)))))
         node.left = l
         node.right = r
         return node
@@ -63,6 +66,13 @@ def foldingAST(node):
         for x in node.array:
             new_list.append(foldingAST(x))
         node.array = new_list
+        return node
+    elif isinstance(node, FuncCall):
+        foldingAST(node.func_name)
+        new_list = []
+        for c in node.par_list:
+            new_list.append(foldingAST(c))
+        node.par_list = new_list
         return node
     else:
         for c in node.children():
