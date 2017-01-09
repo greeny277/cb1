@@ -7,7 +7,7 @@ MCCFLAGS ?=
 # Script to run the binaries
 RUNBIN ?= ../bin/runbinary
 # timeout for binaries
-TIMEOUT ?= 5
+TIMEOUT ?= 15
 export TIMEOUT
 ############ if you need to edit the rest, please tell me. #######################
 
