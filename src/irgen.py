@@ -204,7 +204,7 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
             irfunction.addInstr(CBRA(jump_right))
         elif node.op.val == "&&":
             l_right_cond = irprogram.genLabel()
-            irgen(node.left, irprogram, irfunction, jump_dest, l_right_cond, True)
+            irgen(node.left, irprogram, irfunction, l_right_cond, jump_right, True)
             irfunction.addInstr(l_right_cond)
             irgen(node.right, irprogram, irfunction, jump_dest, jump_right)
             irfunction.addInstr(CBRA(jump_right))
