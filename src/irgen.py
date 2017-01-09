@@ -70,9 +70,11 @@ def getOffset(node, irprogram, irfunction):
     offset = ArithExpr(IntLiteral(0), ast.Operator("+"), IntLiteral(0))
     # compute index for 1-dim array storage
     for i in range(0, len(derefs)):
-            for j in range(i+1, len(dims)):
-                a = ArithExpr(derefs[i], ast.Operator("*"), dims[j])
-                offset = ArithExpr(offset, ast.Operator("+"), a)
+        if i+1 < len(dims):
+            a = ArithExpr(derefs[i], ast.Operator("*"), dims[i+1])
+            for j in range(i+2, len(dims)):
+                a = ArithExpr(a, ast.Operator("*"), dims[j])
+            offset = ArithExpr(offset, ast.Operator("+"), a)
 
     offset = ArithExpr(offset, ast.Operator("+"), derefs[(len(derefs)-1)])
     return irgen(offset, irprogram, irfunction)
