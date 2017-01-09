@@ -184,11 +184,13 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
         return destReg
 
     elif isinstance(node, FuncCall):
+        virts = []
         for p in reversed(node.par_list):
-            virtReg = irgen(p, irprogram, irfunction)
-            irfunction.addInstr(CPUSH(virtReg))
+            virts.append(irgen(p, irprogram, irfunction))
+            
+        for v in virts:
+            irfunction.addInstr(CPUSH(v))
 
-        # get the return type of the func call
         returnType = node.func_name.getDecl().getType()
         destReg = irprogram.getFreeVirtReg(irfunction, returnType)
         irfunction.addInstr(CCALL(destReg, node.func_name.name))
