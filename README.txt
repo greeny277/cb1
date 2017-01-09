@@ -8,8 +8,9 @@ aditional programms:
 ====================
 	- graphviz	(http://www.graphviz.org/)
     - TortoiseHg (http://tortoisehg.bitbucket.org/)
-
-
+	- The python-numpy package (http://www.numpy.org/)
+	  On linux most distributions provide the package
+	  'python3-numpy'
 
 contributors:
 =============
