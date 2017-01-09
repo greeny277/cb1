@@ -83,7 +83,8 @@ def main(arguments):
 
         # This ast dumping is for debugging purposes,
         # you may remove it.
-        dumpAST.dump(x, sys.stdout)
+        #dumpAST.dump(x, sys.stdout)
+
         # initialize libriary functions
         lib = e_parser.doParsing(os.path.dirname(__file__) + '/libs/lib.e')
         if myargs.dotify_ast is not None:
@@ -92,21 +93,8 @@ def main(arguments):
             dumpDot.dumpDot(x, ddf)
             ddf.close()
 
-        # TODO: fold constants
+        # fold constants
         constFold.foldingAST(x)
-
-        # init the lib
-        symbolAST.setLibAST(lib)
-
-        # TODO: resolve declarations
-        symbolAST.traverse(x)
-
-
-        if myargs.dump_ast is not None:
-            adf = open(astdumpfile, "w")
-            adf.write("AST dump\n")
-            # TODO: write AST to file object adf
-            adf.close()
 
         if myargs.dotify_ast is not None:
             """ Save AST after const folding
@@ -116,7 +104,13 @@ def main(arguments):
             dumpDot.dumpDot(x, ddf)
             ddf.close()
 
-        # TODO: check types
+        # init the lib
+        symbolAST.setLibAST(lib)
+
+        # resolve declarations
+        symbolAST.traverse(x)
+
+        # check types
         typeCheck.typeChecking(x)
 
         if myargs.dotify_ast is not None:
@@ -143,7 +137,13 @@ def main(arguments):
             cdf.write(irser.serialize(irprogram))
             cdf.close()
 
-        irprogram.prettyprint(sys.stdout)
+        #irprogram.prettyprint(sys.stdout)
+
+        if myargs.dump_ast is not None:
+            adf = open(astdumpfile, "w")
+            adf.write("AST dump\n")
+            # TODO: write AST to file object adf
+            adf.close()
 
         asmfd = open(asmfile, "w")
         asmfd.write("; python e compiler assembler\n")
