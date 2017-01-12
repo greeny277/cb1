@@ -1,6 +1,5 @@
 """ module for generating intermediate code """
 
-import json
 import ast
 from ir import \
         IRProgram, \

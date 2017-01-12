@@ -345,7 +345,7 @@ class ICode(object):
     @owner.setter
     def owner(self, val):
         self.__owner = val
-    
+
     def getOperandsRead(self):
         """returns a list of operands read in this instruction"""
         # pylint: disable=no-self-use
@@ -403,7 +403,7 @@ class ICodeList(object):
                 slow = slow.next
             odd = not odd
             assert slow is not fast
-        
+
     @typecheck
     def addInstr(self, instr: ICode):
         """appends instruction to function"""
@@ -427,14 +427,14 @@ class ICodeList(object):
             if ins.owner:
                 ins.remove()
             self.addInstr(ins)
-            
+
     @property
     def first(self):
         return self._firstInstr
     @property
     def last(self):
         return self._lastInstr
-            
+
 # pylint: disable=too-many-instance-attributes
 class IRFunction(ICodeList):
     """ IR Function
@@ -454,7 +454,7 @@ class IRFunction(ICodeList):
         self.isPredefined = False
         self.returnType = common.Type.getIntType()
         self.cfg = None
-        
+
     def prettyprint(self, _file):
         """ prettyprinter for dumping this function to _file"""
         _file.write("Function %s returns %s\n" % (self.name, self.returnType))
@@ -497,7 +497,7 @@ class IRFunction(ICodeList):
         if self.cfg is None:
             return super().instrs()
         return self.cfg.instrs()
-        
+
 
 class CTarget(ICode):
     """base class for IR instructions with one target operand
