@@ -65,5 +65,10 @@ def irreg(node, hw_registers=None, hw_register=None, iCode=None):
         node.insertBefore(CASSGN(node.target.val, hw_registers['rax']))
         node.remove()
 
+    elif isinstance(node, CASSGN):
+        irreg(node.source.val, None, hw_registers['rax'], node)
+        node.insertBefore(CASSGN(node.target.val, hw_registers['rax']))
+        node.remove()
+
     else:
         return None
