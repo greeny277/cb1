@@ -8,15 +8,14 @@ int main()
 	int a;
 	int b;
 	int c;
+	int d;
 
 	a := 1;
 	b := 2;
 	c := 3;
 
-	if((foo(a*3) = 1 && b != 2) || c >= 3)
-	{
-		c := 1;
-	}
+	d := (a+b)*c;
+
 
 	return c;
 }
