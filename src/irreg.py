@@ -4,6 +4,7 @@ from ir import \
         IRFunction, \
         IRVariable, \
         ConstValue, \
+        CCondBranch, \
         HardwareRegister, \
         OperandValue, \
         CLOAD, \
@@ -69,6 +70,21 @@ def irreg(node, hw_registers=None, hw_register=None, iCode=None):
         irreg(node.source.val, None, hw_registers['rax'], node)
         node.insertBefore(CASSGN(node.target.val, hw_registers['rax']))
         node.remove()
-
+    elif isinstance(node, CCondBranch):
+        l = irreg(node.left.val, None, hw_registers['rax'], node)
+        r = irreg(node.right.val, None, hw_registers['rcx'], node)
+        if isinstance(node, CBEQ):
+            node.insertBefore(CBEQ(node.label, l, r))
+        if isinstance(node, CBGE):
+            node.insertBefore(CBGE(node.label, l, r))
+        if isinstance(node, CBGT):
+            node.insertBefore(CBGT(node.label, l, r))
+        if isinstance(node, CBLE):
+            node.insertBefore(CBLE(node.label, l, r))
+        if isinstance(node, CBLT):
+            node.insertBefore(CBLT(node.label, l, r))
+        if isinstance(node, CBNE):
+            node.insertBefore(CBNE(node.label, l, r))
+        node.remove()
     else:
         return None
