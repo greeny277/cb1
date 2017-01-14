@@ -86,5 +86,15 @@ def irreg(node, hw_registers=None, hw_register=None, iCode=None):
         if isinstance(node, CBNE):
             node.insertBefore(CBNE(node.label, l, r))
         node.remove()
+    elif isinstance(node, CSTORE):
+        v = irreg(node.value.val, None, hw_registers['rax'], node)
+        node.insertBefore(CSTORE(node.target.val, node.offset.val, v))
+        node.remove()
+    elif isinstance(node, CLOAD):
+        t = irreg(node.target.val, None, hw_registers['rax'], node)
+        node.insertBefore(CLOAD(t, node.base.val, node.offset.val))
+        node.remove()
+
+
     else:
         return None
