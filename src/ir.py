@@ -89,6 +89,7 @@ class IRVariable(OperandValue):
         super(IRVariable, self).__init__(_type)
         self.__name = name
         self.__isGlobal = isGlobal
+        self.__offset = None
 
     def prettyprint(self, _file):
         """ prettyprinter for dumping this variable to _file"""
@@ -110,6 +111,10 @@ class IRVariable(OperandValue):
     def isGlobal(self):
         "true iff this variable is global"
         return self.__isGlobal
+
+    @property
+    def offset(self):
+        return self.__offset
 
 
 class Register(OperandValue):
@@ -159,6 +164,7 @@ class VirtualRegister(Register):
         super(VirtualRegister, self).__init__(name, _type)
         self.__variable = None
         self.__hwreg = None
+        self.__offset = None
 
     @property
     def variable(self):
@@ -184,6 +190,9 @@ class VirtualRegister(Register):
         assert self.__variable is None
         self.__hwreg = reg
 
+    @property
+    def offset(self):
+        return self.__offset
 
 class IRProgram(object):
     """wrapper class for ir of whole program"""
@@ -193,7 +202,7 @@ class IRProgram(object):
         self._nextlabelid = 0
         self._nextvregid = 0
         self._used_names = set()
- 
+
     def prettyprint(self, _file):
         """ prettyprinter for dumping the program to _file"""
         for var in self.variables:
