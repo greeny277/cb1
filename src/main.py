@@ -14,6 +14,7 @@ import typeCheck
 import irgen
 import irser
 import irreg
+import iroffset
 
 from common import InputError
 
@@ -127,6 +128,9 @@ def main(arguments):
 
         # Register distribution
         irreg.irreg(irprogram)
+
+        # Compute offsets relative to framepointer
+        iroffset.iroffset(irprogram)
 
         irprogram.prettyprint(sys.stdout)
         if myargs.dump_cil_to_file_and_exit is not None:

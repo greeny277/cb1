@@ -13,19 +13,22 @@ from ir import \
 def iroffset(node, curOffset=None):
     if isinstance(node, IRProgram):
         for x in node.functions:
-            iroffset(x)
-    elif isinstance(node, IRFunction):
-        offset = 0
-        for param in node.params.values():
-            offset += 8
-            param.offset = offset
-        for x in node.instrs():
             iroffset(x, 0)
+    elif isinstance(node, IRFunction):
+        paramOffset = 0
+        for param in node.params.values():
+            paramOffset += 8
+            param.offset = paramOffset
+            #print("Param:" + str(node) + " has offset: " + str(param.offset))
+        tmpOffset = 0
+        for x in node.instrs():
+            tmpOffset = iroffset(x, tmpOffset)
     elif isinstance(node, IRVariable) or \
             isinstance(node, VirtualRegister):
         if node.offset is None:
             curOffset -= 8
             node.offset = curOffset
+            #print("LocalVar: " + str(node) + " has offset: " + str(node.offset))
         return curOffset
     elif isinstance(node, CBinary) or \
             isinstance(node, CCondBranch):
@@ -42,3 +45,5 @@ def iroffset(node, curOffset=None):
     elif isinstance(node, CUnary):
         tmpOffset = iroffset(node.source.val, curOffset)
         return iroffset(node.target.val, tmpOffset)
+    else:
+        return curOffset
