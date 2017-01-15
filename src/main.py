@@ -13,6 +13,7 @@ import symbolAST
 import typeCheck
 import irgen
 import irser
+import irreg
 
 from common import InputError
 
@@ -121,8 +122,13 @@ def main(arguments):
             dumpDot.dumpDot(x, ddf)
             ddf.close()
 
+        # Generate intermediate representation
         irprogram = irgen.irgen(x)
 
+        # Register distribution
+        irreg.irreg(irprogram)
+
+        irprogram.prettyprint(sys.stdout)
         if myargs.dump_cil_to_file_and_exit is not None:
             # file name of specified CIL Dump file
             cildumpfile_spec = myargs.dump_cil_to_file_and_exit[0]
@@ -137,7 +143,6 @@ def main(arguments):
             cdf.write(irser.serialize(irprogram))
             cdf.close()
 
-        #irprogram.prettyprint(sys.stdout)
 
         if myargs.dump_ast is not None:
             adf = open(astdumpfile, "w")
