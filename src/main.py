@@ -140,6 +140,7 @@ def main(arguments):
             cdf = open(cildumpfile_spec, "w")
             cdf.write(irser.serialize(irprogram))
             cdf.close()
+            sys.exit(0)
 
         if myargs.dump_cil is not None:
             cdf = open(cildumpfile, "w")
