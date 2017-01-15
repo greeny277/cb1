@@ -34,11 +34,11 @@ def iroffset(node, curOffset=None):
             isinstance(node, CCondBranch):
         tmpOffset = iroffset(node.left.val, curOffset)
         return iroffset(node.right.val, tmpOffset)
-    elif isinstance(node, CSTORE):
+    elif isinstance(node, CLOAD):
         tmpOffset = iroffset(node.target.val, curOffset)
         tmpOffset = iroffset(node.base.val, tmpOffset)
         return iroffset(node.offset.val, tmpOffset)
-    elif isinstance(node, CLOAD):
+    elif isinstance(node, CSTORE):
         tmpOffset = iroffset(node.target.val, curOffset)
         tmpOffset = iroffset(node.offset.val, tmpOffset)
         return iroffset(node.offset.val, tmpOffset)
