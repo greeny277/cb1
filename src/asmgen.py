@@ -61,15 +61,19 @@ def asmgen(node, asmfile, filename=None):
     elif isinstance(node, CCALL):
         asmfile.write("call\t" + node.name + "\n")
     elif isinstance(node, CRET):
-        asmfile.write("mov\t" + "rax," + str(node.source.val) + "\n")
+        asmfile.write("mov\t" + "rax, ")
+        asmgen(node.source.val, asmfile)
+        asmfile.write("\n")
         asmfile.write("\tpop rbp\n")
         asmfile.write("\tret\n")
     elif isinstance(node, CCondBranch):
         if isinstance(node, CLABEL):
             asmfile.write(str(node.label) + ":\n")
-        left = str(node.left.val)[1:]
-        right = str(node.left.val)[1:]
-        asmfile.write("cmp\t" + left + "," + right + "\n")
+        asmfile.write("cmp\t")
+        asmgen(node.left.val, asmfile)
+        asmfile.write(", ")
+        asmgen(node.right.val, asmfile)
+        asmfile.write("\n")
         if isinstance(node, CBEQ):
             asmfile.write("je\t" + str(node.label) + "\n")
         if isinstance(node, CBGE):
