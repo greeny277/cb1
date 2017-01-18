@@ -91,9 +91,9 @@ def irgen(node, irprogram=None, irfunction=None, jump_dest=None, jump_right=None
                 arr_type = v.type.getBaseType()
                 for dim in dims:
                     arr_type = arr_type.getArrayType(dim)
-                irvar = irprogram.getIRVar(v.name.name, arr_type)
+                irvar = irprogram.getIRVar(v.name.name, arr_type, True)
             else:
-                irvar = irprogram.getIRVar(v.name.name, v.type)
+                irvar = irprogram.getIRVar(v.name.name, v.type, True)
             irprogram.variables.append(irvar)
             v.setIRVar(irvar)
         for f in node.funcs:  # TODO use addFunc(?)
