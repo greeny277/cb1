@@ -48,9 +48,15 @@ def asmgen(node, asmfile, filename=None):
             asmfile.write("\t")
     if isinstance(node, IRProgram):
         asmfile.write(".file\t\"" + filename + "\"\n")
-        asmfile.write(".intel_syntax noprefix\n")
-        asmfile.write(".text\n")
+        asmfile.write("\t.intel_syntax noprefix\n")
+        asmfile.write("\t.text\n")
+        asmfile.write("\t.global\t_start\n")
 
+        asmfile.write("_start:\n")
+        asmfile.write("\tcall\tmain\n")
+        asmfile.write("\tmov\tebx, eax\n")
+        asmfile.write("\tmov\teax, 1\n")
+        asmfile.write("\tint\t80h\n")
         for func in node.functions:
             asmfile.write(func.name + ":\n")
             asmgen(func, asmfile, filename)

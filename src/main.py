@@ -157,7 +157,7 @@ def main(arguments):
             adf.close()
 
         asmfd = open(asmfile, "w")
-        asmfd.write("; python e compiler assembler\n")
+        asmfd.write("# python e compiler assembler\n")
         asmgen.asmgen(irprogram, asmfd, inputfile)
         # TODO: assembler generation
         asmfd.close()
