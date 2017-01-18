@@ -6,10 +6,12 @@ from ir import \
         ConstValue, \
         CCondBranch, \
         HardwareRegister, \
+        VirtualRegister, \
         OperandValue, \
         CUnary, \
         CLOAD, \
         CBinary,\
+        CLABEL,\
         CPUSH, \
         CMUL, \
         CADD, \
@@ -39,7 +41,7 @@ def print_debug(node, asmfile):
     asmfile.write("# " + node.prettyprint())
 
 
-def asmgen(node, asmfile, filename):
+def asmgen(node, asmfile, filename=None):
     print_debug(node, asmfile)
     if isinstance(node, IRProgram):
         asmfile.write(".file\t\"" + filename + "\"\n")
@@ -61,7 +63,7 @@ def asmgen(node, asmfile, filename):
         asmfile.write("ret\n")
     elif isinstance(node, CCondBranch):
         if isinstance(node, CLABEL):
-            asmfile.write(str(node.label) + ":\n"
+            asmfile.write(str(node.label) + ":\n")
 
         asmfile.write("cmp\t" + str(node.left) + "," + str(node.right) + "\n")
         if isinstance(node, CBEQ):
@@ -71,8 +73,46 @@ def asmgen(node, asmfile, filename):
         if isinstance(node, CBGT):
             asmfile.write("jg\t" + str(node.label)+"\n")
         if isinstance(node, CBLE):
-            asmfile.write("jle\t" + str(node.label) +"\n")
+            asmfile.write("jle\t" + str(node.label) + "\n")
         if isinstance(node, CBLT):
             asmfile.write("jl\t" + str(node.label) + "\n")
         if isinstance(node, CBNE):
             asmfile.write("jne\t" + str(node.label) + "\n")
+    elif isinstance(node, IRFunction):
+        asmfile.write("push\trbp\n")
+        asmfile.write("mov\trbp, rsp\n")
+        stackFrame = 8 * (len(node.vars) + len(node.virtRegs))
+        if stackFrame > 0:
+            asmfile.write("sub\trsp, " + str(stackFrame))
+        for instr in node.instrs():
+            asmgen(instr, asmfile)
+
+    elif isinstance(node, CBinary):
+        if isinstance(node, CDIV):
+            asmfile.write("cdq\n")
+            asmfile.write("idiv\t")
+
+        elif isinstance(node, CADD):
+            asmfile.write("add\t")
+        elif isinstance(node, CSUB):
+            asmfile.write("sub\t")
+        elif isinstance(node, CMUL):
+            asmfile.write("imul\t")
+
+        asmgen(node.left, asmfile)
+        asmfile.write(", ")
+        asmgen(node.right, asmfile)
+        asmfile.write("\n")
+    elif isinstance(node, CUnary):
+        asmfile.write("mov\t")
+        asmgen(node.target, asmfile)
+        asmfile.write(", ")
+        asmgen(node.source, asmfile)
+        asmfile.write("\n")
+    elif isinstance(node, VirtualRegister) or isinstance(node, IRVariable):
+        if node.offset < 0:
+            asmfile.write("[rbp" + str(node.offset) + "]")
+        else:
+            asmfile.write("[rbp+" + str(node.offset) + "]")
+    elif isinstance(node, OperandValue):
+        asmfile.write(str(node.name))
