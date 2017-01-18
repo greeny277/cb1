@@ -55,9 +55,24 @@ def asmgen(node, asmfile, filename):
     elif isinstance(node, CPUSH):
         asmfile.write("push\t" + str(node.source))
     elif isinstance(node, CCALL):
+        asmfile.write("call\t" + node.name + "\n")
     elif isinstance(node, CRET):
-    elif isinstance(node, IRFunction):
+        asmfile.write("mov\t" + "rax," + str(node.source.val) + "\n")
+        asmfile.write("ret\n")
     elif isinstance(node, CCondBranch):
-    elif isinstance(node, CBinary):
-    elif isinstance(node, CAssign):
-    elif isinstance(node, CUnary):
+        if isinstance(node, CLABEL):
+            asmfile.write(str(node.label) + ":\n"
+
+        asmfile.write("cmp\t" + str(node.left) + "," + str(node.right) + "\n")
+        if isinstance(node, CBEQ):
+            asmfile.write("je\t" + str(node.label) + "\n")
+        if isinstance(node, CBGE):
+            asmfile.write("jge\t" + str(node.label) + "\n")
+        if isinstance(node, CBGT):
+            asmfile.write("jg\t" + str(node.label)+"\n")
+        if isinstance(node, CBLE):
+            asmfile.write("jle\t" + str(node.label) +"\n")
+        if isinstance(node, CBLT):
+            asmfile.write("jl\t" + str(node.label) + "\n")
+        if isinstance(node, CBNE):
+            asmfile.write("jne\t" + str(node.label) + "\n")
