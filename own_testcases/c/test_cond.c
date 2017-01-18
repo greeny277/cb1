@@ -10,8 +10,10 @@ int main(int argc, char **argv){
 
 	a = 1;
 	b = 2;
-	c = 3;
-	d = 4;
+	c = -3;
+	d = -4;
+
+	b = d/c;
 
 	if((foo(c) + 1) <= (a*b))
 	{
