@@ -44,7 +44,8 @@ def print_debug(node, asmfile):
 def asmgen(node, asmfile, filename=None):
     if not isinstance(node, OperandValue):
         print_debug(node, asmfile)
-        asmfile.write("\t")
+        if not isinstance(node, CLABEL):
+            asmfile.write("\t")
     if isinstance(node, IRProgram):
         asmfile.write(".file\t\"" + filename + "\"\n")
         asmfile.write(".intel_syntax noprefix\n")
@@ -66,26 +67,28 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write("\n")
         asmfile.write("\tpop rbp\n")
         asmfile.write("\tret\n")
+    elif isinstance(node, CLABEL):
+        asmfile.write("." + str(node) + "\n")
+    elif isinstance(node, CBRA):
+        asmfile.write("jmp\t" + str(node.label)[:-1] + "\n")
     elif isinstance(node, CCondBranch):
-        if isinstance(node, CLABEL):
-            asmfile.write(str(node.label) + ":\n")
         asmfile.write("cmp\t")
         asmgen(node.left.val, asmfile)
         asmfile.write(", ")
         asmgen(node.right.val, asmfile)
         asmfile.write("\n")
         if isinstance(node, CBEQ):
-            asmfile.write("je\t" + str(node.label) + "\n")
+            asmfile.write("\tje\t" + str(node.label)[:-1] + "\n")
         if isinstance(node, CBGE):
-            asmfile.write("jge\t" + str(node.label) + "\n")
+            asmfile.write("\tjge\t" + str(node.label)[:-1] + "\n")
         if isinstance(node, CBGT):
-            asmfile.write("jg\t" + str(node.label)+"\n")
+            asmfile.write("\tjg\t" + str(node.label)[:-1]+"\n")
         if isinstance(node, CBLE):
-            asmfile.write("jle\t" + str(node.label) + "\n")
+            asmfile.write("\tjle\t" + str(node.label)[:-1] + "\n")
         if isinstance(node, CBLT):
-            asmfile.write("jl\t" + str(node.label) + "\n")
+            asmfile.write("\tjl\t" + str(node.label)[:-1] + "\n")
         if isinstance(node, CBNE):
-            asmfile.write("jne\t" + str(node.label) + "\n")
+            asmfile.write("\tjne\t" + str(node.label)[:-1] + "\n")
     elif isinstance(node, IRFunction):
         asmfile.write("push\trbp\n")
         asmfile.write("\tmov\trbp, rsp\n")
