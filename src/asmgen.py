@@ -56,7 +56,7 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write("\tcall\tmain\n")
         asmfile.write("\tmov\tebx, eax\n")
         asmfile.write("\tmov\teax, 1\n")
-        asmfile.write("\tint\t80h\n")
+        asmfile.write("\tint\t0x80\n")
         for func in node.functions:
             asmfile.write(func.name + ":\n")
             asmgen(func, asmfile, filename)
