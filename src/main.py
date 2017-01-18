@@ -15,6 +15,7 @@ import irgen
 import irser
 import irreg
 import iroffset
+import asmgen
 
 from common import InputError
 
@@ -157,6 +158,7 @@ def main(arguments):
 
         asmfd = open(asmfile, "w")
         asmfd.write("; python e compiler assembler\n")
+        asmgen.asmgen(irprogram, asmfd, inputfile)
         # TODO: assembler generation
         asmfd.close()
 

@@ -38,15 +38,17 @@ callee_save = ["rbx", "rbp", "r12", "r13", "r14", "r15"]
 
 
 def print_debug(node, asmfile):
-    asmfile.write("# " + node.prettyprint())
+    asmfile.write("\t# " + str(node) + "\n")
 
 
 def asmgen(node, asmfile, filename=None):
-    print_debug(node, asmfile)
+    if not isinstance(node, OperandValue):
+        print_debug(node, asmfile)
+        asmfile.write("\t")
     if isinstance(node, IRProgram):
         asmfile.write(".file\t\"" + filename + "\"\n")
-        asmfile.write(".intel_syntax noprefix")
-        asmfile.write(".text")
+        asmfile.write(".intel_syntax noprefix\n")
+        asmfile.write(".text\n")
 
         for func in node.functions:
             asmfile.write(func.name + ":\n")
@@ -82,10 +84,10 @@ def asmgen(node, asmfile, filename=None):
             asmfile.write("jne\t" + str(node.label) + "\n")
     elif isinstance(node, IRFunction):
         asmfile.write("push\trbp\n")
-        asmfile.write("mov\trbp, rsp\n")
+        asmfile.write("\tmov\trbp, rsp\n")
         stackFrame = 8 * (len(node.vars) + len(node.virtRegs))
         if stackFrame > 0:
-            asmfile.write("sub\trsp, " + str(stackFrame))
+            asmfile.write("\tsub\trsp, " + str(stackFrame) + "\n")
         for instr in node.instrs():
             asmgen(instr, asmfile)
 
@@ -101,15 +103,15 @@ def asmgen(node, asmfile, filename=None):
         elif isinstance(node, CMUL):
             asmfile.write("imul\t")
 
-        asmgen(node.left, asmfile)
+        asmgen(node.left.val, asmfile)
         asmfile.write(", ")
-        asmgen(node.right, asmfile)
+        asmgen(node.right.val, asmfile)
         asmfile.write("\n")
     elif isinstance(node, CUnary):
         asmfile.write("mov\t")
-        asmgen(node.target, asmfile)
+        asmgen(node.target.val, asmfile)
         asmfile.write(", ")
-        asmgen(node.source, asmfile)
+        asmgen(node.source.val, asmfile)
         asmfile.write("\n")
     elif isinstance(node, VirtualRegister) or isinstance(node, IRVariable):
         if node.offset < 0:
@@ -117,4 +119,4 @@ def asmgen(node, asmfile, filename=None):
         else:
             asmfile.write("[rbp+" + str(node.offset) + "]")
     elif isinstance(node, OperandValue):
-        asmfile.write(str(node.name))
+        asmfile.write(str(node))
