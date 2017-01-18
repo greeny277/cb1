@@ -60,8 +60,8 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write("call\t" + node.name + "\n")
     elif isinstance(node, CRET):
         asmfile.write("mov\t" + "rax," + str(node.source.val) + "\n")
-        asmfile.write("pop rbp\n")
-        asmfile.write("ret\n")
+        asmfile.write("\tpop rbp\n")
+        asmfile.write("\tret\n")
     elif isinstance(node, CCondBranch):
         if isinstance(node, CLABEL):
             asmfile.write(str(node.label) + ":\n")
