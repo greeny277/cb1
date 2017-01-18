@@ -65,8 +65,8 @@ def asmgen(node, asmfile, filename=None):
     elif isinstance(node, CCondBranch):
         if isinstance(node, CLABEL):
             asmfile.write(str(node.label) + ":\n")
-        left = str(node.left)[1:]
-        right = str(node.left)[1:]
+        left = str(node.left.val)[1:]
+        right = str(node.left.val)[1:]
         asmfile.write("cmp\t" + left + "," + right + "\n")
         if isinstance(node, CBEQ):
             asmfile.write("je\t" + str(node.label) + "\n")
