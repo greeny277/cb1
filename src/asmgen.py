@@ -127,7 +127,9 @@ def asmgen(node, asmfile, filename=None):
         asmgen(node.source.val, asmfile)
         asmfile.write("\n")
     elif isinstance(node, VirtualRegister) or isinstance(node, IRVariable):
-        if node.offset < 0:
+        if node.offset is None:
+            asmfile.write(str(node))
+        elif node.offset < 0:
             asmfile.write("[rbp" + str(node.offset) + "]")
         else:
             asmfile.write("[rbp+" + str(node.offset) + "]")
