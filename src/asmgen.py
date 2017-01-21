@@ -77,7 +77,7 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write("mov\t" + "rax, ")
         asmgen(node.source.val, asmfile)
         asmfile.write("\n")
-        asmfile.write("\tpop rbp\n")
+        asmfile.write("\tleave\n")
         asmfile.write("\tret\n")
     elif isinstance(node, CLABEL):
         asmfile.write("." + str(node) + "\n")
