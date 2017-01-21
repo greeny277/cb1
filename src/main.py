@@ -35,8 +35,8 @@ RuntimeObjFile = MyDirectory + "/sys.o"
 parser = argparse.ArgumentParser(description="e compiler (in python)")
 parser.add_argument('-o', help="output file", nargs=1, default=["a.out"],
                     metavar="<outputFile>")
-parser.add_argument('-S', help="Just generate assembler",
-                    action='store_true', default=False)
+parser.add_argument('-S', help="Just generate assembler", nargs=1,
+                    metavar="<outputFile>")
 parser.add_argument('-c', help="Do not call the linker",
                     action='store_true', default=False)
 parser.add_argument('--keep', help="do not delete temporary files",
@@ -70,9 +70,13 @@ def main(arguments):
 
         # file name of temporary assembler file
         asmfile = inputfilebasename + ".S"
+        if myargs.S is not None:
+            asmfile = myargs.S[0] + ".S"
 
         # file name of temporary object file
         objfile = inputfilebasename + ".o"
+        if myargs.o is not None:
+            objfile = myargs.o[0] + ".o"
 
         # file name of AST Dump
         astdumpfile = inputfilebasename + ".AST"
@@ -159,19 +163,25 @@ def main(arguments):
         asmfd = open(asmfile, "w")
         asmfd.write("# python e compiler assembler\n")
         asmgen.asmgen(irprogram, asmfd, inputfile)
-        # TODO: assembler generation
+        # assembler generation
         asmfd.close()
 
         # TODO: if needed, switch to compiling RuntimeSrcFile
         #       into RuntimeObjFile
-
-        # TODO: run assembler, make it produce objfile from asmfile
-
-        # TODO: run linker, make it produce outputfile from objfile
-        #       and RuntimeObjFile
+        #
 
         # if no args are given
+        if myargs.S is not None:
+            sys.exit(0)
+        if myargs.o is not None:
+            os.system("as -o " + objfile + " " + asmfile)
+            os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc " + objfile + " -o  " + myargs.o[0])
+            sys.exit(0)
+
+        # run assembler, make it produce objfile from asmfile
         os.system("as -o a.o " + asmfile)
+        # run linker, make it produce outputfile from objfile
+        #       and RuntimeObjFile
         os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc a.o")
 
         if not myargs.keep:
