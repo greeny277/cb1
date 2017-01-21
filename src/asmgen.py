@@ -66,7 +66,13 @@ def asmgen(node, asmfile, filename=None):
     elif isinstance(node, CPUSH):
         asmfile.write("push\t" + str(node.source))
     elif isinstance(node, CCALL):
-        asmfile.write("call\t" + node.name + "\n")
+        if node.name == "readChar":
+            asmfile.write("call\tgetchar@PLT\n")
+        else:
+            asmfile.write("call\t" + node.name + "\n")
+        asmfile.write("\tmov\t")
+        asmgen(node.target.val, asmfile)
+        asmfile.write(", rax\n")
     elif isinstance(node, CRET):
         asmfile.write("mov\t" + "rax, ")
         asmgen(node.source.val, asmfile)
