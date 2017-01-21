@@ -16,6 +16,8 @@ int main()
 
 	d := (a+b)*c;
 
+	b := readChar();
+
 
 	return c;
 }
