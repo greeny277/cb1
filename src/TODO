@@ -1,0 +1,5 @@
+iroffset:
+Berechne offsets von array variablen
+
+asmgen:
+Beachte beim stackframe berechnen arrays
