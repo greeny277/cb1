@@ -50,7 +50,7 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write(".file\t\"" + filename + "\"\n")
         asmfile.write("\t.intel_syntax noprefix\n")
         asmfile.write("\t.text\n")
-        asmfile.write("\t.global\t_start\n")
+        asmfile.write("\t.global\t_start, main\n")
 
         asmfile.write("_start:\n")
         asmfile.write("\tcall\tmain\n")
