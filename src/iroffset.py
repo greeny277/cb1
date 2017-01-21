@@ -29,9 +29,17 @@ def iroffset(node, curOffset=None):
         if isinstance(node, IRVariable) and node.isGlobal:
             return curOffset
         if node.offset is None:
-            curOffset -= 8
-            node.offset = curOffset
-            print("LocalVar: " + str(node) + " has offset: " + str(node.offset))
+            if node.type.isPrimitive():
+                curOffset -= 8
+                node.offset = curOffset
+            else:
+                dimSize = 1
+                for dim in node.type.getSimpleDimList():
+                    dimSize *= dim
+                curOffset -= 8*dimSize
+                node.offset = curOffset
+
+        print("LocalVar: " + str(node) + " has offset: " + str(node.offset))
         return curOffset
     elif isinstance(node, CBinary) or \
             isinstance(node, CCondBranch):
