@@ -104,7 +104,15 @@ def asmgen(node, asmfile, filename=None):
     elif isinstance(node, IRFunction):
         asmfile.write("push\trbp\n")
         asmfile.write("\tmov\trbp, rsp\n")
-        stackFrame = 8 * (len(node.vars) + len(node.virtRegs))
+        stackFrame = 8 * len(node.virtRegs)
+        for locVar in node.vars.values():
+            if locVar.type.isPrimitive():
+                stackFrame += 8
+            else:
+                dimSize = 1
+                for dim in locVar.type.getSimpleDimList():
+                    dimSize *= dim
+                stackFrame += 8*dimSize
         if stackFrame > 0:
             asmfile.write("\tsub\trsp, " + str(stackFrame) + "\n")
         for instr in node.instrs():
@@ -126,12 +134,6 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write(", ")
         asmgen(node.right.val, asmfile)
         asmfile.write("\n")
-    elif isinstance(node, CUnary):
-        asmfile.write("mov\t")
-        asmgen(node.target.val, asmfile)
-        asmfile.write(", ")
-        asmgen(node.source.val, asmfile)
-        asmfile.write("\n")
     elif isinstance(node, VirtualRegister) or isinstance(node, IRVariable):
         if node.offset is None:
             asmfile.write(str(node))
@@ -141,3 +143,26 @@ def asmgen(node, asmfile, filename=None):
             asmfile.write("[rbp+" + str(node.offset) + "]")
     elif isinstance(node, OperandValue):
         asmfile.write(str(node))
+    elif isinstance(node, CSTORE):
+        asmfile.write("mov rbx, ")
+        asmgen(node.offset.val, asmfile)
+        asmfile.write("\n")
+        asmfile.write("\tadd rbx, " + str(node.target.val.offset) + "\n")
+        asmfile.write("\tmov [rbp + rbx], ")
+        asmgen(node.value.val, asmfile)
+        asmfile.write("\n")
+    elif isinstance(node, CLOAD):
+        asmfile.write("mov rbx, ")
+        asmgen(node.offset.val, asmfile)
+        asmfile.write("\n")
+        asmfile.write("\tadd rbx, " + str(node.target.val.offset) + "\n")
+        asmfile.write("\tmov ")
+        asmgen(node.target.val, asmfile)
+        asmfile.write(", ")
+        asmfile.write("[rbp + rbx]\n")
+    elif isinstance(node, CUnary):
+        asmfile.write("mov\t")
+        asmgen(node.target.val, asmfile)
+        asmfile.write(", ")
+        asmgen(node.source.val, asmfile)
+        asmfile.write("\n")
