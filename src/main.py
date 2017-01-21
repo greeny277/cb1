@@ -166,11 +166,13 @@ def main(arguments):
         #       into RuntimeObjFile
 
         # TODO: run assembler, make it produce objfile from asmfile
-        os.system("touch " + objfile)
 
         # TODO: run linker, make it produce outputfile from objfile
         #       and RuntimeObjFile
-        os.system("touch " + outputfile)
+
+        # if no args are given
+        os.system("as -o a.o " + asmfile)
+        os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc a.o")
 
         if not myargs.keep:
             # TODO: remove all temporary files
