@@ -73,7 +73,7 @@ def asmgen(node, asmfile, filename=None):
     elif isinstance(node, CPUSH):
         if isinstance(node.next, CCALL):
             if node.next.name == "writeChar" or node.next.name == "writeInt":
-                asmfile.write("mov edi, ")
+                asmfile.write("mov rdi, ")
                 asmgen(node.source.val, asmfile)
                 return
 
