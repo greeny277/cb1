@@ -91,7 +91,7 @@ def asmgen(node, asmfile, filename=None):
     elif isinstance(node, CLABEL):
         asmfile.write("." + str(node) + "\n")
     elif isinstance(node, CBRA):
-        asmfile.write("jmp\t" + str(node.label)[:-1] + "\n")
+        asmfile.write("jmp\t." + str(node.label)[:-1] + "\n")
     elif isinstance(node, CCondBranch):
         asmfile.write("cmp\t")
         asmgen(node.left.val, asmfile)
@@ -99,17 +99,17 @@ def asmgen(node, asmfile, filename=None):
         asmgen(node.right.val, asmfile)
         asmfile.write("\n")
         if isinstance(node, CBEQ):
-            asmfile.write("\tje\t" + str(node.label)[:-1] + "\n")
+            asmfile.write("\tje\t." + str(node.label)[:-1] + "\n")
         if isinstance(node, CBGE):
-            asmfile.write("\tjge\t" + str(node.label)[:-1] + "\n")
+            asmfile.write("\tjge\t." + str(node.label)[:-1] + "\n")
         if isinstance(node, CBGT):
-            asmfile.write("\tjg\t" + str(node.label)[:-1]+"\n")
+            asmfile.write("\tjg\t." + str(node.label)[:-1]+"\n")
         if isinstance(node, CBLE):
-            asmfile.write("\tjle\t" + str(node.label)[:-1] + "\n")
+            asmfile.write("\tjle\t." + str(node.label)[:-1] + "\n")
         if isinstance(node, CBLT):
-            asmfile.write("\tjl\t" + str(node.label)[:-1] + "\n")
+            asmfile.write("\tjl\t." + str(node.label)[:-1] + "\n")
         if isinstance(node, CBNE):
-            asmfile.write("\tjne\t" + str(node.label)[:-1] + "\n")
+            asmfile.write("\tjne\t." + str(node.label)[:-1] + "\n")
     elif isinstance(node, IRFunction):
         asmfile.write("push\trbp\n")
         asmfile.write("\tmov\trbp, rsp\n")
