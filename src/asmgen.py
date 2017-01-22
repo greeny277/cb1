@@ -62,7 +62,14 @@ def asmgen(node, asmfile, filename=None):
             asmgen(func, asmfile, filename)
 
         for globVar in node.variables:
-            asmfile.write(".lcomm\t" + globVar.name + ", 8\n")
+            if globVar.type.isPrimitive():
+                asmfile.write(".lcomm\t" + globVar.name + ", 8\n")
+            else:
+                dimSize = 1
+                for dim in globVar.type.getSimpleDimList():
+                    dimSize *= dim
+                asmfile.write(".lcomm\t" + globVar.name + ", " + str(dimSize) + "\n")
+
     elif isinstance(node, CPUSH):
         if isinstance(node.next, CCALL):
             if node.next.name == "writeChar" or node.next.name == "writeInt":
