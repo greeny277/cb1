@@ -170,19 +170,25 @@ def main(arguments):
         #       into RuntimeObjFile
         #
 
+        # Compile libs
+
+        reader = os.path.dirname(__file__) + '/libs/reader.S'
+
+        os.system("as -o " + os.path.dirname(__file__) + "/libs/readInt.o " + reader)
+        readerObj = os.path.dirname(__file__) + '/libs/readInt.o'
         # if no args are given
         if myargs.S is not None:
             sys.exit(0)
         if myargs.o is not None:
             os.system("as -o " + objfile + " " + asmfile)
-            os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc " + objfile + " -o  " + myargs.o[0])
+            os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc " + readerObj + " " + objfile + " -o  " + myargs.o[0])
             sys.exit(0)
 
         # run assembler, make it produce objfile from asmfile
         os.system("as -o a.o " + asmfile)
         # run linker, make it produce outputfile from objfile
         #       and RuntimeObjFile
-        os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc a.o")
+        os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc " + readerObj + " a.o")
 
         if not myargs.keep:
             # TODO: remove all temporary files

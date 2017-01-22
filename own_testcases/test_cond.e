@@ -10,7 +10,7 @@ int main()
 	int c;
 	int d;
 
-	a := 1;
+	a := readInt();
 	b := 2;
 	c := 3;
 
