@@ -64,10 +64,19 @@ def asmgen(node, asmfile, filename=None):
         for globVar in node.variables:
             asmfile.write(".lcomm\t" + globVar.name + ", 8\n")
     elif isinstance(node, CPUSH):
-        asmfile.write("push\t" + str(node.source))
+        if isinstance(node.next, CCALL):
+            if node.next.name == "writeChar":
+                asmfile.write("mov edi, ")
+                asmgen(node.source.val, asmfile)
+                return
+
+        asmfile.write("push\t")
+        asmgen(node.source.val, asmfile)
     elif isinstance(node, CCALL):
         if node.name == "readChar":
             asmfile.write("call\tgetchar@PLT\n")
+        elif node.name == "writeChar":
+            asmfile.write("call\tputchar@PLT\n")
         else:
             asmfile.write("call\t" + node.name + "\n")
         asmfile.write("\tmov\t")
