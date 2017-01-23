@@ -2,29 +2,24 @@
 	.intel_syntax noprefix
 	.section	.rodata
 .LC0:
-	.string	"%ld"
+	.string	"%lld"
 	.text
 	.globl	writeInt
 	.type	writeInt, @function
 writeInt:
 	push	rbp
 	mov	rbp, rsp
-	sub	rsp, 32
-	mov	QWORD PTR [rbp-24], rdi
-	mov	rax, QWORD PTR [rbp-24]
-	mov	rsi, rax
-	mov	edi, OFFSET FLAT:.LC0
-	mov	eax, 0
-	call	printf
-	mov	rax, QWORD PTR stdout[rip]
-	mov	rdi, rax
-	call	fflush
-	mov	DWORD PTR [rbp-4], 1
+	push	rbx
+	sub	rsp, 56
+	mov	QWORD PTR [rbp-56], rdi
+	mov	rax, QWORD PTR [rbp-56]
+	mov	QWORD PTR [rbp-32], rax
+	mov	DWORD PTR [rbp-20], 1
 	jmp	.L2
 .L3:
-	add	DWORD PTR [rbp-4], 1
+	add	DWORD PTR [rbp-20], 1
 .L2:
-	mov	rcx, QWORD PTR [rbp-24]
+	mov	rcx, QWORD PTR [rbp-56]
 	movabs	rdx, 7378697629483820647
 	mov	rax, rcx
 	imul	rdx
@@ -33,10 +28,47 @@ writeInt:
 	sar	rax, 63
 	sub	rdx, rax
 	mov	rax, rdx
-	mov	QWORD PTR [rbp-24], rax
-	cmp	QWORD PTR [rbp-24], 0
+	mov	QWORD PTR [rbp-56], rax
+	cmp	QWORD PTR [rbp-56], 0
 	jne	.L3
-	mov	eax, DWORD PTR [rbp-4]
+	mov	eax, DWORD PTR [rbp-20]
+	mov	rdx, rsp
+	mov	rbx, rdx
+	mov	edx, eax
+	sub	rdx, 1
+	mov	QWORD PTR [rbp-40], rdx
+	mov	edx, eax
+	mov	r10, rdx
+	mov	r11d, 0
+	mov	edx, eax
+	mov	r8, rdx
+	mov	r9d, 0
+	mov	edx, eax
+	mov	eax, 16
+	sub	rax, 1
+	add	rax, rdx
+	mov	esi, 16
+	mov	edx, 0
+	div	rsi
+	imul	rax, rax, 16
+	sub	rsp, rax
+	mov	rax, rsp
+	add	rax, 0
+	mov	QWORD PTR [rbp-48], rax
+	mov	rax, QWORD PTR [rbp-48]
+	mov	rdx, QWORD PTR [rbp-32]
+	mov	esi, OFFSET FLAT:.LC0
+	mov	rdi, rax
+	mov	eax, 0
+	call	sprintf
+	mov	edx, DWORD PTR [rbp-20]
+	mov	rax, QWORD PTR [rbp-48]
+	mov	rsi, rax
+	mov	edi, 1
+	call	write
+	mov	eax, DWORD PTR [rbp-20]
+	mov	rsp, rbx
+	mov	rbx, QWORD PTR [rbp-8]
 	leave
 	ret
 	.size	writeInt, .-writeInt
