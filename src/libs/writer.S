@@ -31,6 +31,10 @@ writeInt:
 	mov	QWORD PTR [rbp-56], rax
 	cmp	QWORD PTR [rbp-56], 0
 	jne	.L3
+	cmp	QWORD PTR [rbp-32], 0
+	jns	.L4
+	add	DWORD PTR [rbp-20], 1
+.L4:
 	mov	eax, DWORD PTR [rbp-20]
 	mov	rdx, rsp
 	mov	rbx, rdx
