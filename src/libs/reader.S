@@ -1,11 +1,11 @@
 # python e compiler assembler
-	# <ir.IRProgram object at 0x7f141e6e8198>
+	# <ir.IRProgram object at 0x7fd08175a358>
 	.file	"reader.e"
 	.intel_syntax noprefix
 	.text
 	.global	readInt
 readInt:
-	# <ir.IRFunction object at 0x7f141e6e83c8>
+	# <ir.IRFunction object at 0x7fd08175a240>
 	push	rbp
 	mov	rbp, rsp
 	sub	rsp, 88
@@ -80,7 +80,7 @@ readInt:
 	# r = rax
 	mov	[rbp-16], rax
 	# $R0 = CALL [readChar]
-	call	getchar@PLT
+	call	readChar
 	mov	[rbp-48], rax
 	# rax = $R0
 	mov	rax, [rbp-48]
