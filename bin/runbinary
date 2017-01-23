@@ -15,7 +15,7 @@ else
 fi
 
 if [ -z "$2" ] ; then 
-	exec $toprefix "$IPREFIX" "$1"
+	eval exec $toprefix "$IPREFIX" "$1"
 else
-	exec $toprefix "$IPREFIX" "$1" < "$2"
+	eval exec $toprefix "$IPREFIX" "$1" < "$2"
 fi
