@@ -1,3 +1,4 @@
+	.file	"writer.c"
 	.intel_syntax noprefix
 	.section	.rodata
 .LC0:
@@ -15,6 +16,9 @@ writeInt:
 	mov	edi, OFFSET FLAT:.LC0
 	mov	eax, 0
 	call	printf
+	mov	rax, QWORD PTR stdout[rip]
+	mov	rdi, rax
+	call	fflush
 	mov	DWORD PTR [rbp-4], 1
 	jmp	.L2
 .L3:
@@ -38,4 +42,3 @@ writeInt:
 	.size	writeInt, .-writeInt
 	.ident	"GCC: (Debian 4.9.2-10) 4.9.2"
 	.section	.note.GNU-stack,"",@progbits
-
