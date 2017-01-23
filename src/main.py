@@ -153,11 +153,9 @@ def main(arguments):
             cdf.write(irser.serialize(irprogram))
             cdf.close()
 
-
         if myargs.dump_ast is not None:
             adf = open(astdumpfile, "w")
             adf.write("AST dump\n")
-            # TODO: write AST to file object adf
             adf.close()
 
         asmfd = open(asmfile, "w")
@@ -177,36 +175,46 @@ def main(arguments):
         writeChar = os.path.dirname(__file__) + '/libs/writeChar.S'
         readChar = os.path.dirname(__file__) + '/libs/readChar.S'
 
-        os.system("as -o " + os.path.dirname(__file__) + "/libs/readInt.o " + reader)
+        os.system("as -o " + os.path.dirname(__file__) + "/libs/readInt.o "
+                  + reader)
         readerObj = os.path.dirname(__file__) + '/libs/readInt.o'
 
-        os.system("as -o " + os.path.dirname(__file__) + "/libs/writeInt.o " + writer)
+        os.system("as -o " + os.path.dirname(__file__) + "/libs/writeInt.o "
+                  + writer)
         writerObj = os.path.dirname(__file__) + '/libs/writeInt.o'
-        
-        os.system("as -o " + os.path.dirname(__file__) + "/libs/writeChar.o " + writeChar)
+
+        os.system("as -o " + os.path.dirname(__file__) + "/libs/writeChar.o "
+                  + writeChar)
         writeCharObj = os.path.dirname(__file__) + '/libs/writeChar.o'
 
-        os.system("as -o " + os.path.dirname(__file__) + "/libs/readChar.o " + readChar)
+        os.system("as -o " + os.path.dirname(__file__) + "/libs/readChar.o "
+                  + readChar)
         readCharObj = os.path.dirname(__file__) + '/libs/readChar.o'
         # if no args are given
         if myargs.S is not None:
             sys.exit(0)
         if myargs.o is not None:
             os.system("as -o " + objfile + " " + asmfile)
-            os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc " + readCharObj + " " + writeCharObj + " "+ readerObj + " " +
-                    writerObj + " " + objfile + " -o  " + myargs.o[0])
-            sys.exit(0)
-
-        # run assembler, make it produce objfile from asmfile
-        os.system("as -o a.o " + asmfile)
-        # run linker, make it produce outputfile from objfile
-        #       and RuntimeObjFile
-        os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc " + readCharObj + " " + writeCharObj + " " + readerObj + " " +
-                writerObj + " a.o")
+            os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc "
+                      + readCharObj + " " + writeCharObj + " " + readerObj
+                      + " " + writerObj + " " + objfile + " -o  " + outputfile)
+        else: 
+            objfile = "a.o"
+            # run assembler, make it produce objfile from asmfile
+            os.system("as -o a.o " + asmfile)
+            # run linker, make it produce outputfile from objfile
+            #       and RuntimeObjFile
+            os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc "
+                      + readCharObj + " " + writeCharObj + " " + readerObj
+                      + " " + writerObj + " a.o")
 
         if not myargs.keep:
-            # TODO: remove all temporary files
-            pass
+            os.system("rm -rf " + asmfile + " " + readerObj + " " + writerObj
+                      + " " + readCharObj + " " + writeCharObj + " "
+                      + astdumpfile + " " + cildumpfile + " "
+                      + dotdumpfile + " " + objfile)
+
+        sys.exit(0)
     except InputError as e:
         print(e)
         sys.exit(1)
