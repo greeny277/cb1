@@ -68,6 +68,7 @@ def asmgen(node, asmfile, filename=None):
                 dimSize = 1
                 for dim in globVar.type.getSimpleDimList():
                     dimSize *= dim
+                dimSize *= 8
                 asmfile.write(".lcomm\t" + globVar.name + ", " + str(dimSize) + "\n")
 
     elif isinstance(node, CPUSH):
