@@ -38,7 +38,7 @@ def foldingAST(node):
             elif node.op.val == "-":
                 return IntLiteral(str(np.int64(int(l.val.split('.')[0])) - np.int64(int(r.val.split('.')[0]))))
             elif node.op.val == "/":
-                return IntLiteral(str(int(np.int64(int(l.val.split('.')[0])) / np.int64(int(r.val.split('.')[0])))))
+                return IntLiteral(str(int(np.int64(int(l.val.split('.')[0])) // np.int64(int(r.val.split('.')[0])))))
         if isinstance(l, FloatLiteral) and isinstance(r, FloatLiteral):
             if node.op.val == "+":
                 return FloatLiteral(str((np.float64(float(l.val)) + np.float64(float(r.val)))))
@@ -47,7 +47,7 @@ def foldingAST(node):
             elif node.op.val == "-":
                 return FloatLiteral(str((np.float64(float(l.val)) - np.float64(float(r.val)))))
             elif node.op.val == "/":
-                return FloatLiteral(str((np.float64(float(l.val)) / np.float64(float(r.val)))))
+                return FloatLiteral(str((np.float64(float(l.val)) // np.float64(float(r.val)))))
         node.left = l
         node.right = r
         return node

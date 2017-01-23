@@ -138,7 +138,7 @@ def asmgen(node, asmfile, filename=None):
     elif isinstance(node, CBinary):
         if isinstance(node, CDIV):
             asmfile.write("cqo\n")
-            asmfile.write("idiv\t")
+            asmfile.write("\tidiv\t")
 
         elif isinstance(node, CADD):
             asmfile.write("add\t")
