@@ -86,12 +86,7 @@ def asmgen(node, asmfile, filename=None):
         asmgen(node.source.val, asmfile)
         asmfile.write("\n")
     elif isinstance(node, CCALL):
-        if node.name == "readChar":
-            asmfile.write("call\tgetchar@PLT\n")
-        elif node.name == "writeChar":
-            asmfile.write("call\tputchar@PLT\n")
-        else:
-            asmfile.write("call\t" + node.name + "\n")
+        asmfile.write("call\t" + node.name + "\n")
         asmfile.write("\tmov\t")
         asmgen(node.target.val, asmfile)
         asmfile.write(", rax\n")
