@@ -174,6 +174,8 @@ def main(arguments):
 
         reader = os.path.dirname(__file__) + '/libs/reader.S'
         writer = os.path.dirname(__file__) + '/libs/writer.S'
+        writeChar = os.path.dirname(__file__) + '/libs/writeChar.S'
+        readChar = os.path.dirname(__file__) + '/libs/readChar.S'
 
         os.system("as -o " + os.path.dirname(__file__) + "/libs/readInt.o " + reader)
         readerObj = os.path.dirname(__file__) + '/libs/readInt.o'
@@ -181,12 +183,17 @@ def main(arguments):
         os.system("as -o " + os.path.dirname(__file__) + "/libs/writeInt.o " + writer)
         writerObj = os.path.dirname(__file__) + '/libs/writeInt.o'
         
+        os.system("as -o " + os.path.dirname(__file__) + "/libs/writeChar.o " + writeChar)
+        writeCharObj = os.path.dirname(__file__) + '/libs/writeChar.o'
+
+        os.system("as -o " + os.path.dirname(__file__) + "/libs/readChar.o " + readChar)
+        readCharObj = os.path.dirname(__file__) + '/libs/readChar.o'
         # if no args are given
         if myargs.S is not None:
             sys.exit(0)
         if myargs.o is not None:
             os.system("as -o " + objfile + " " + asmfile)
-            os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc " + readerObj + " " +
+            os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc " + readCharObj + " " + writeCharObj + " "+ readerObj + " " +
                     writerObj + " " + objfile + " -o  " + myargs.o[0])
             sys.exit(0)
 
@@ -194,7 +201,7 @@ def main(arguments):
         os.system("as -o a.o " + asmfile)
         # run linker, make it produce outputfile from objfile
         #       and RuntimeObjFile
-        os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc " + readerObj + " " +
+        os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc " + readCharObj + " " + writeCharObj + " " + readerObj + " " +
                 writerObj + " a.o")
 
         if not myargs.keep:

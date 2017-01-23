@@ -50,7 +50,10 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write(".file\t\"" + filename + "\"\n")
         asmfile.write("\t.intel_syntax noprefix\n")
         asmfile.write("\t.text\n")
-        asmfile.write("\t.global\t_start, main\n")
+        asmfile.write("\t.global\t_start")
+        for func in node.functions:
+            asmfile.write(", " + func.name)
+        asmfile.write("\n")
 
         asmfile.write("_start:\n")
         asmfile.write("\tcall\tmain\n")
@@ -68,6 +71,7 @@ def asmgen(node, asmfile, filename=None):
                 dimSize = 1
                 for dim in globVar.type.getSimpleDimList():
                     dimSize *= dim
+                dimSize *= 8
                 asmfile.write(".lcomm\t" + globVar.name + ", " + str(dimSize) + "\n")
 
     elif isinstance(node, CPUSH):
@@ -82,12 +86,7 @@ def asmgen(node, asmfile, filename=None):
         asmgen(node.source.val, asmfile)
         asmfile.write("\n")
     elif isinstance(node, CCALL):
-        if node.name == "readChar":
-            asmfile.write("call\tgetchar@PLT\n")
-        elif node.name == "writeChar":
-            asmfile.write("call\tputchar@PLT\n")
-        else:
-            asmfile.write("call\t" + node.name + "\n")
+        asmfile.write("call\t" + node.name + "\n")
         asmfile.write("\tmov\t")
         asmgen(node.target.val, asmfile)
         asmfile.write(", rax\n")

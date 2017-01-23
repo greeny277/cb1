@@ -16,7 +16,7 @@ def iroffset(node, curOffset=None):
         for x in node.functions:
             iroffset(x, 0)
     elif isinstance(node, IRFunction):
-        paramOffset = 0
+        paramOffset = 8
         for param in node.params.values():
             paramOffset += 8
             param.offset = paramOffset
