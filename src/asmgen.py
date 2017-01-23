@@ -80,6 +80,7 @@ def asmgen(node, asmfile, filename=None):
 
         asmfile.write("push\t")
         asmgen(node.source.val, asmfile)
+        asmfile.write("\n")
     elif isinstance(node, CCALL):
         if node.name == "readChar":
             asmfile.write("call\tgetchar@PLT\n")
