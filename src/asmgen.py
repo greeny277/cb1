@@ -75,6 +75,7 @@ def asmgen(node, asmfile, filename=None):
             if node.next.name == "writeChar" or node.next.name == "writeInt":
                 asmfile.write("mov rdi, ")
                 asmgen(node.source.val, asmfile)
+                asmfile.write("\n")
                 return
 
         asmfile.write("push\t")
@@ -163,20 +164,20 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write("mov rbx, ")
         asmgen(node.offset.val, asmfile)
         asmfile.write("\n")
-        asmfile.write("\tlea rcx,")
+        asmfile.write("\tlea rsi,")
         asmgen(node.target.val, asmfile)
         asmfile.write("\n")
-        asmfile.write("\tmov [rcx + rbx*0x8], ")
+        asmfile.write("\tmov [rsi + rbx*0x8], ")
         asmgen(node.value.val, asmfile)
         asmfile.write("\n")
     elif isinstance(node, CLOAD):
         asmfile.write("mov rbx, ")
         asmgen(node.offset.val, asmfile)
         asmfile.write("\n")
-        asmfile.write("\tlea rcx,")
+        asmfile.write("\tlea rsi,")
         asmgen(node.base.val, asmfile)
         asmfile.write("\n")
-        asmfile.write("\tmov rbx, [rcx + rbx*0x8]\n")
+        asmfile.write("\tmov rbx, [rsi + rbx*0x8]\n")
         asmfile.write("\tmov ")
         asmgen(node.target.val, asmfile)
         asmfile.write(", rbx\n")
