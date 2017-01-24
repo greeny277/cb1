@@ -35,10 +35,12 @@ from ir import \
 calling_convention = ["rdi, rsi, rdx, rcx, r8, r9"]
 caller_save = calling_convention + ["rax", "r10", "r11"]
 callee_save = ["rbx", "rbp", "r12", "r13", "r14", "r15"]
+param_counter = 0
 
 
 def print_debug(node, asmfile):
     asmfile.write("\t# " + str(node) + "\n")
+
 
 
 def asmgen(node, asmfile, filename=None):
@@ -81,6 +83,9 @@ def asmgen(node, asmfile, filename=None):
                 asmfile.write(".lcomm\t" + globVar.name + ", " + str(dimSize) + "\n")
 
     elif isinstance(node, CPUSH):
+        global param_counter
+        param_counter += 1
+
         if isinstance(node.next, CCALL):
             if node.next.name == "writeChar" or node.next.name == "writeInt":
                 asmfile.write("mov rdi, ")
@@ -101,6 +106,10 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write("\tmov\t")
         asmgen(node.target.val, asmfile)
         asmfile.write(", rax\n")
+        global param_counter
+        if param_counter >= 1 and node.name != "writeChar" and node.name != "writeInt":
+            asmfile.write("\tadd rsp, " + str(8*param_counter) + "\n")
+        param_counter = 0
     elif isinstance(node, CRET):
         asmfile.write("mov\t" + "rax, ")
         asmgen(node.source.val, asmfile)
