@@ -52,7 +52,10 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write("\t.text\n")
         asmfile.write("\t.global\t_start")
         for func in node.functions:
-            asmfile.write(", " + func.name)
+            if func.name == "mod":
+                asmfile.write(", mod_0")
+            else:
+                asmfile.write(", " + func.name)
         asmfile.write("\n")
 
         asmfile.write("_start:\n")
@@ -61,7 +64,10 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write("\tmov\teax, 1\n")
         asmfile.write("\tint\t0x80\n")
         for func in node.functions:
-            asmfile.write(func.name + ":\n")
+            if func.name == "mod":
+                asmfile.write("mod_0:\n")
+            else:
+                asmfile.write(func.name + ":\n")
             asmgen(func, asmfile, filename)
 
         for globVar in node.variables:
@@ -88,6 +94,8 @@ def asmgen(node, asmfile, filename=None):
     elif isinstance(node, CCALL):
         if node.name == "time":
             asmfile.write("call\tmy_time\n")
+        elif node.name == "mod":
+            asmfile.write("call\tmod_0\n")
         else:
             asmfile.write("call\t" + node.name + "\n")
         asmfile.write("\tmov\t")
