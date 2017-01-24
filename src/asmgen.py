@@ -86,7 +86,10 @@ def asmgen(node, asmfile, filename=None):
         asmgen(node.source.val, asmfile)
         asmfile.write("\n")
     elif isinstance(node, CCALL):
-        asmfile.write("call\t" + node.name + "\n")
+        if node.name == "time":
+            asmfile.write("call\tmy_time\n")
+        else:
+            asmfile.write("call\t" + node.name + "\n")
         asmfile.write("\tmov\t")
         asmgen(node.target.val, asmfile)
         asmfile.write(", rax\n")
