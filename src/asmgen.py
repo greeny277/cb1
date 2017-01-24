@@ -152,6 +152,9 @@ def asmgen(node, asmfile, filename=None):
                 stackFrame += 8*dimSize
         if stackFrame > 0:
             asmfile.write("\tsub\trsp, " + str(stackFrame) + "\n")
+        while stackFrame > 0:
+            asmfile.write("\tmov QWORD PTR [rbp-" + str(stackFrame) + "], 0\n")
+            stackFrame -= 8
         for instr in node.instrs():
             asmgen(instr, asmfile)
 
