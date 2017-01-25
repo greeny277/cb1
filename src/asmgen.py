@@ -152,9 +152,19 @@ def asmgen(node, asmfile, filename=None):
                 stackFrame += 8*dimSize
         if stackFrame > 0:
             asmfile.write("\tsub\trsp, " + str(stackFrame) + "\n")
-        while stackFrame > 0:
-            asmfile.write("\tmov QWORD PTR [rbp-" + str(stackFrame) + "], 0\n")
-            stackFrame -= 8
+            for locVar in node.vars.values():
+                if not locVar.type.isPrimitive():
+                    # zero out  the array
+                    asmfile.write("\tlea\t rax, ")
+                    asmgen(locVar, asmfile)
+                    asmfile.write("\n")
+                    asmfile.write("\tmov rdx, " + str(8*dimSize) + "\n")
+                    asmfile.write("\tmov rsi, 0\n")
+                    asmfile.write("\tmov rdi, rax\n")
+                    asmfile.write("\tcall memset\n")
+      #  while stackFrame > 0:
+       #     asmfile.write("\tmov QWORD PTR [rbp-" + str(stackFrame) + "], 0\n")
+        #    stackFrame -= 8
         for instr in node.instrs():
             asmgen(instr, asmfile)
 
@@ -197,6 +207,7 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write("mov rbx, ")
         asmgen(node.offset.val, asmfile)
         asmfile.write("\n")
+
         asmfile.write("\tlea rsi,")
         asmgen(node.base.val, asmfile)
         asmfile.write("\n")
