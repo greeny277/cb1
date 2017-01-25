@@ -35,10 +35,12 @@ from ir import \
 calling_convention = ["rdi, rsi, rdx, rcx, r8, r9"]
 caller_save = calling_convention + ["rax", "r10", "r11"]
 callee_save = ["rbx", "rbp", "r12", "r13", "r14", "r15"]
+param_counter = 0
 
 
 def print_debug(node, asmfile):
     asmfile.write("\t# " + str(node) + "\n")
+
 
 
 def asmgen(node, asmfile, filename=None):
@@ -52,7 +54,10 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write("\t.text\n")
         asmfile.write("\t.global\t_start")
         for func in node.functions:
-            asmfile.write(", " + func.name)
+            if func.name == "mod":
+                asmfile.write(", mod_0")
+            else:
+                asmfile.write(", " + func.name)
         asmfile.write("\n")
 
         asmfile.write("_start:\n")
@@ -61,7 +66,10 @@ def asmgen(node, asmfile, filename=None):
         asmfile.write("\tmov\teax, 1\n")
         asmfile.write("\tint\t0x80\n")
         for func in node.functions:
-            asmfile.write(func.name + ":\n")
+            if func.name == "mod":
+                asmfile.write("mod_0:\n")
+            else:
+                asmfile.write(func.name + ":\n")
             asmgen(func, asmfile, filename)
 
         for globVar in node.variables:
@@ -75,6 +83,9 @@ def asmgen(node, asmfile, filename=None):
                 asmfile.write(".lcomm\t" + globVar.name + ", " + str(dimSize) + "\n")
 
     elif isinstance(node, CPUSH):
+        global param_counter
+        param_counter += 1
+
         if isinstance(node.next, CCALL):
             if node.next.name == "writeChar" or node.next.name == "writeInt":
                 asmfile.write("mov rdi, ")
@@ -86,10 +97,19 @@ def asmgen(node, asmfile, filename=None):
         asmgen(node.source.val, asmfile)
         asmfile.write("\n")
     elif isinstance(node, CCALL):
-        asmfile.write("call\t" + node.name + "\n")
+        if node.name == "time":
+            asmfile.write("call\tmy_time\n")
+        elif node.name == "mod":
+            asmfile.write("call\tmod_0\n")
+        else:
+            asmfile.write("call\t" + node.name + "\n")
         asmfile.write("\tmov\t")
         asmgen(node.target.val, asmfile)
         asmfile.write(", rax\n")
+        global param_counter
+        if param_counter >= 1 and node.name != "writeChar" and node.name != "writeInt":
+            asmfile.write("\tadd rsp, " + str(8*param_counter) + "\n")
+        param_counter = 0
     elif isinstance(node, CRET):
         asmfile.write("mov\t" + "rax, ")
         asmgen(node.source.val, asmfile)
@@ -132,13 +152,16 @@ def asmgen(node, asmfile, filename=None):
                 stackFrame += 8*dimSize
         if stackFrame > 0:
             asmfile.write("\tsub\trsp, " + str(stackFrame) + "\n")
+        while stackFrame > 0:
+            asmfile.write("\tmov QWORD PTR [rbp-" + str(stackFrame) + "], 0\n")
+            stackFrame -= 8
         for instr in node.instrs():
             asmgen(instr, asmfile)
 
     elif isinstance(node, CBinary):
         if isinstance(node, CDIV):
             asmfile.write("cqo\n")
-            asmfile.write("idiv\t")
+            asmfile.write("\tidiv\t")
 
         elif isinstance(node, CADD):
             asmfile.write("add\t")

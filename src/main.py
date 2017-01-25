@@ -174,6 +174,8 @@ def main(arguments):
         writer = os.path.dirname(__file__) + '/libs/writer.S'
         writeChar = os.path.dirname(__file__) + '/libs/writeChar.S'
         readChar = os.path.dirname(__file__) + '/libs/readChar.S'
+        time = os.path.dirname(__file__) + '/libs/time.S'
+        exit = os.path.dirname(__file__) + '/libs/my_exit.S'
 
         os.system("as -o " + os.path.dirname(__file__) + "/libs/readInt.o "
                   + reader)
@@ -190,29 +192,39 @@ def main(arguments):
         os.system("as -o " + os.path.dirname(__file__) + "/libs/readChar.o "
                   + readChar)
         readCharObj = os.path.dirname(__file__) + '/libs/readChar.o'
+
+        os.system("as -o " + os.path.dirname(__file__) + "/libs/time.o "
+                  + time)
+        timeObj = os.path.dirname(__file__) + '/libs/time.o'
+
+        os.system("as -o " + os.path.dirname(__file__) + "/libs/my_exit.o "
+                  + exit)
+        exitObj = os.path.dirname(__file__) + '/libs/my_exit.o'
         # if no args are given
         if myargs.S is not None:
             sys.exit(0)
         if myargs.o is not None:
             os.system("as -o " + objfile + " " + asmfile)
-            os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc "
-                      + readCharObj + " " + writeCharObj + " " + readerObj
-                      + " " + writerObj + " " + objfile + " -o  " + outputfile)
+            os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc " +
+                      " " + exitObj + " " + timeObj + " " + readCharObj + " " +
+                      writeCharObj + " " + readerObj + " " + writerObj + " " +
+                      objfile + " -o  " + outputfile)
         else: 
             objfile = "a.o"
             # run assembler, make it produce objfile from asmfile
             os.system("as -o a.o " + asmfile)
             # run linker, make it produce outputfile from objfile
             #       and RuntimeObjFile
-            os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc "
-                      + readCharObj + " " + writeCharObj + " " + readerObj
-                      + " " + writerObj + " a.o")
+            os.system("ld -dynamic-linker /lib64/ld-linux-x86-64.so.2 -lc " +
+                      " " + exitObj + " " + timeObj +
+                      " " + readCharObj + " " + writeCharObj + " " + readerObj +
+                      " " + writerObj + " a.o")
 
-        if not myargs.keep:
-            os.system("rm -rf " + asmfile + " " + readerObj + " " + writerObj
-                      + " " + readCharObj + " " + writeCharObj + " "
-                      + astdumpfile + " " + cildumpfile + " "
-                      + dotdumpfile + " " + objfile)
+        #if not myargs.keep:
+        #    os.system("rm -rf " + asmfile + " " + readerObj + " " + writerObj
+        #              + " " + readCharObj + " " + writeCharObj + " "
+        #              + astdumpfile + " " + cildumpfile + " "
+        #              + dotdumpfile + " " + objfile)
 
         sys.exit(0)
     except InputError as e:
