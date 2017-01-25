@@ -162,9 +162,6 @@ def asmgen(node, asmfile, filename=None):
                     asmfile.write("\tmov rsi, 0\n")
                     asmfile.write("\tmov rdi, rax\n")
                     asmfile.write("\tcall memset\n")
-      #  while stackFrame > 0:
-       #     asmfile.write("\tmov QWORD PTR [rbp-" + str(stackFrame) + "], 0\n")
-        #    stackFrame -= 8
         for instr in node.instrs():
             asmgen(instr, asmfile)
 
