@@ -22,6 +22,10 @@ def iroffset(node, curOffset=None):
             param.offset = paramOffset
             print("Param:" + str(node) + " has offset: " + str(param.offset))
         tmpOffset = 0
+        for v in node.vars.values():
+            tmpOffset = iroffset(v, tmpOffset)
+        for virt in node.virtRegs.values():
+            tmpOffset = iroffset(virt, tmpOffset)
         for x in node.instrs():
             tmpOffset = iroffset(x, tmpOffset)
     elif isinstance(node, IRVariable) or \
@@ -38,8 +42,8 @@ def iroffset(node, curOffset=None):
                     dimSize *= dim
                 curOffset -= 8*dimSize
                 node.offset = curOffset
+            print("LocalVar: " + str(node) + " has offset: " + str(node.offset))
 
-        print("LocalVar: " + str(node) + " has offset: " + str(node.offset))
         return curOffset
     elif isinstance(node, CBinary) or \
             isinstance(node, CCondBranch):
