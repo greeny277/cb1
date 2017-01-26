@@ -32,15 +32,11 @@ from ir import \
         CSTORE
 
 
-calling_convention = ["rdi, rsi, rdx, rcx, r8, r9"]
-caller_save = calling_convention + ["rax", "r10", "r11"]
-callee_save = ["rbx", "rbp", "r12", "r13", "r14", "r15"]
 param_counter = 0
 
 
 def print_debug(node, asmfile):
     asmfile.write("\t# " + str(node) + "\n")
-
 
 
 def asmgen(node, asmfile, filename=None):
