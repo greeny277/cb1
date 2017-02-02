@@ -32,15 +32,11 @@ from ir import \
         CSTORE
 
 
-calling_convention = ["rdi, rsi, rdx, rcx, r8, r9"]
-caller_save = calling_convention + ["rax", "r10", "r11"]
-callee_save = ["rbx", "rbp", "r12", "r13", "r14", "r15"]
 param_counter = 0
 
 
 def print_debug(node, asmfile):
     asmfile.write("\t# " + str(node) + "\n")
-
 
 
 def asmgen(node, asmfile, filename=None):
@@ -162,9 +158,6 @@ def asmgen(node, asmfile, filename=None):
                     asmfile.write("\tmov rsi, 0\n")
                     asmfile.write("\tmov rdi, rax\n")
                     asmfile.write("\tcall memset\n")
-      #  while stackFrame > 0:
-       #     asmfile.write("\tmov QWORD PTR [rbp-" + str(stackFrame) + "], 0\n")
-        #    stackFrame -= 8
         for instr in node.instrs():
             asmgen(instr, asmfile)
 
