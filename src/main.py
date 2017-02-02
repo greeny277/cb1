@@ -106,8 +106,8 @@ def main(arguments):
         if myargs.dotify_ast is not None:
             """ Save AST after const folding
             """
-            dotdumpfile = inputfilebasename + ".simplfied" + ".dot"
-            ddf = open(dotdumpfile, "w")
+            dotdumpfilesimplified = inputfilebasename + ".simplfied" + ".dot"
+            ddf = open(dotdumpfilesimplified, "w")
             dumpDot.dumpDot(x, ddf)
             ddf.close()
 
@@ -123,8 +123,8 @@ def main(arguments):
         if myargs.dotify_ast is not None:
             """ Save AST after const folding
             """
-            dotdumpfile = inputfilebasename + ".typing" + ".dot"
-            ddf = open(dotdumpfile, "w")
+            dotdumpfiletyping = inputfilebasename + ".typing" + ".dot"
+            ddf = open(dotdumpfiletyping, "w")
             dumpDot.dumpDot(x, ddf)
             ddf.close()
 
@@ -220,11 +220,11 @@ def main(arguments):
                       " " + readCharObj + " " + writeCharObj + " " + readerObj +
                       " " + writerObj + " a.o")
 
-        #if not myargs.keep:
-        #    os.system("rm -rf " + asmfile + " " + readerObj + " " + writerObj
-        #              + " " + readCharObj + " " + writeCharObj + " "
-        #              + astdumpfile + " " + cildumpfile + " "
-        #              + dotdumpfile + " " + objfile)
+        if not myargs.keep:
+            os.system("rm -rf " + asmfile + " " + readerObj + " " + writerObj
+                      + " " + readCharObj + " " + writeCharObj + " "
+                      + astdumpfile + " " + cildumpfile + " "
+                      + dotdumpfile + " " + dotdumpfilesimplified + " " + dotdumpfiletyping + " " + objfile)
 
         sys.exit(0)
     except InputError as e:
@@ -233,3 +233,4 @@ def main(arguments):
 
 if __name__ == '__main__':
     main(sys.argv[1:])
+
